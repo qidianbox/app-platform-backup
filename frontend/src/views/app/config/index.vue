@@ -9,8 +9,17 @@
         <div class="app-icon">
           <span>{{ appInfo.name?.charAt(0) || '应' }}</span>
         </div>
-        <span class="app-name">{{ appInfo.name || '加载中...' }}</span>
-        <span class="app-id">{{ appInfo.app_id || '' }}</span>
+        <div class="header-info">
+          <div class="app-name-row">
+            <span class="app-name">{{ appInfo.name || '加载中...' }}</span>
+            <span class="app-id">{{ appInfo.app_id || '' }}</span>
+          </div>
+          <!-- Tab切换 -->
+          <el-tabs v-model="activeTab" class="header-tabs">
+            <el-tab-pane label="工作台" name="workspace" />
+            <el-tab-pane label="配置中心" name="config" />
+          </el-tabs>
+        </div>
       </div>
       <div class="header-right">
         <el-dropdown>
@@ -85,6 +94,22 @@
 
       <!-- 右侧内容区 -->
       <div class="content-area">
+        <!-- 工作台模式 -->
+        <template v-if="activeTab === 'workspace'">
+          <div class="workspace-content">
+            <h2 class="page-title">工作台</h2>
+            <el-alert 
+              title="功能开发中" 
+              type="info" 
+              description="工作台功能正在开发中，敬请期待！这里将显示用户管理、消息推送、日志查询等实际操作功能。" 
+              :closable="false" 
+              show-icon
+            />
+          </div>
+        </template>
+
+        <!-- 配置中心模式 -->
+        <template v-else-if="activeTab === 'config'">
         <!-- 概览页面 -->
         <div v-if="currentPage === 'overview'" class="page-content">
           <h2 class="page-title">APP概览</h2>
@@ -840,6 +865,7 @@
         <div v-else class="page-content">
           <el-empty description="请从左侧选择配置项" />
         </div>
+        </template>
       </div>
     </div>
   </div>
@@ -859,6 +885,7 @@ import request from '@/utils/request'
 const route = useRoute()
 const appId = computed(() => route.params.id)
 
+const activeTab = ref('config') // 默认显示配置中心
 const currentPage = ref('overview')
 const expandedGroups = ref(['user', 'message', 'data', 'system', 'storage'])
 const adminName = ref(localStorage.getItem('adminName') || 'Admin')
@@ -1198,6 +1225,18 @@ onMounted(() => {
     font-size: 16px;
   }
   
+  .header-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  
+  .app-name-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
   .app-name {
     font-size: 18px;
     font-weight: 600;
@@ -1209,6 +1248,38 @@ onMounted(() => {
     background: rgba(255, 255, 255, 0.1);
     padding: 2px 8px;
     border-radius: 4px;
+  }
+  
+  .header-tabs {
+    :deep(.el-tabs__header) {
+      margin: 0;
+      border: none;
+    }
+    
+    :deep(.el-tabs__nav-wrap::after) {
+      display: none;
+    }
+    
+    :deep(.el-tabs__item) {
+      color: rgba(255, 255, 255, 0.7);
+      padding: 0 12px;
+      height: 32px;
+      line-height: 32px;
+      font-size: 14px;
+      
+      &.is-active {
+        color: white;
+        font-weight: 600;
+      }
+      
+      &:hover {
+        color: white;
+      }
+    }
+    
+    :deep(.el-tabs__active-bar) {
+      background-color: white;
+    }
   }
 }
 
@@ -1455,3 +1526,15 @@ onMounted(() => {
   width: 150px;
 }
 </style>
+
+
+.workspace-content {
+  padding: 24px;
+  
+  .page-title {
+    font-size: 24px;
+    font-weight: 600;
+    color: #303133;
+    margin-bottom: 20px;
+  }
+}

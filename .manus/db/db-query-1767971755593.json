@@ -1,0 +1,45 @@
+{
+  "query": "SELECT app_id, module_code, COUNT(*) as count FROM app_modules GROUP BY app_id, module_code;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3HmF555sZ6wXsVo.885fbf394348 --database cSZcQBnZuHpLU79S85jppV --execute SELECT app_id, module_code, COUNT(*) as count FROM app_modules GROUP BY app_id, module_code;",
+  "rows": [
+    {
+      "app_id": "1",
+      "module_code": "log_service",
+      "count": "2"
+    },
+    {
+      "app_id": "1",
+      "module_code": "user_management",
+      "count": "2"
+    },
+    {
+      "app_id": "1",
+      "module_code": "data_tracking",
+      "count": "2"
+    },
+    {
+      "app_id": "2",
+      "module_code": "user_management",
+      "count": "1"
+    },
+    {
+      "app_id": "2",
+      "module_code": "message_center",
+      "count": "1"
+    },
+    {
+      "app_id": "1",
+      "module_code": "message_center",
+      "count": "2"
+    },
+    {
+      "app_id": "1",
+      "module_code": "push_service",
+      "count": "2"
+    }
+  ],
+  "messages": [],
+  "stdout": "app_id\tmodule_code\tcount\n1\tlog_service\t2\n1\tuser_management\t2\n1\tdata_tracking\t2\n2\tuser_management\t1\n2\tmessage_center\t1\n1\tmessage_center\t2\n1\tpush_service\t2\n",
+  "stderr": "",
+  "execution_time_ms": 1475
+}

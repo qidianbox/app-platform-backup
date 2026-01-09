@@ -1,0 +1,8 @@
+{
+  "query": "SELECT id, app_id, module_code, module_name FROM app_modules WHERE app_id = 2 ORDER BY id;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3HmF555sZ6wXsVo.885fbf394348 --database cSZcQBnZuHpLU79S85jppV --execute SELECT id, app_id, module_code, module_name FROM app_modules WHERE app_id = 2 ORDER BY id;",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1054 (42S22) at line 1: Unknown column 'module_name' in 'field list'"
+  ]
+}

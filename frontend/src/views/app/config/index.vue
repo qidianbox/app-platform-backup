@@ -1137,13 +1137,22 @@ const hasModulesInGroup = (groupKey) => {
 const getModulesInGroup = (groupKey) => {
   const group = moduleGroups.find(g => g.key === groupKey)
   if (!group) return []
-  return appModules.value
+  
+  // 去重：使用Map确保每个module_code只出现一次
+  const uniqueModules = new Map()
+  appModules.value
     .filter(m => group.modules.includes(m.module_code))
-    .map(m => ({
-      ...m,
-      source_module: m.module_code, // 兼容侧边栏点击
-      name: moduleNameMap[m.module_code] || m.module_name || m.name
-    }))
+    .forEach(m => {
+      if (!uniqueModules.has(m.module_code)) {
+        uniqueModules.set(m.module_code, {
+          ...m,
+          source_module: m.module_code, // 兼容侧边栏点击
+          name: moduleNameMap[m.module_code] || m.module_name || m.name
+        })
+      }
+    })
+  
+  return Array.from(uniqueModules.values())
 }
 
 // 获取APP信息

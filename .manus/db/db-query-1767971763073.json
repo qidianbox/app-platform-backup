@@ -1,0 +1,60 @@
+{
+  "query": "SELECT id, app_id, module_code FROM app_modules WHERE app_id = 1 ORDER BY id;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3HmF555sZ6wXsVo.885fbf394348 --database cSZcQBnZuHpLU79S85jppV --execute SELECT id, app_id, module_code FROM app_modules WHERE app_id = 1 ORDER BY id;",
+  "rows": [
+    {
+      "id": "30001",
+      "app_id": "1",
+      "module_code": "user_management"
+    },
+    {
+      "id": "30002",
+      "app_id": "1",
+      "module_code": "message_center"
+    },
+    {
+      "id": "30003",
+      "app_id": "1",
+      "module_code": "push_service"
+    },
+    {
+      "id": "30004",
+      "app_id": "1",
+      "module_code": "data_tracking"
+    },
+    {
+      "id": "30005",
+      "app_id": "1",
+      "module_code": "log_service"
+    },
+    {
+      "id": "60001",
+      "app_id": "1",
+      "module_code": "user_management"
+    },
+    {
+      "id": "60002",
+      "app_id": "1",
+      "module_code": "message_center"
+    },
+    {
+      "id": "60003",
+      "app_id": "1",
+      "module_code": "push_service"
+    },
+    {
+      "id": "60004",
+      "app_id": "1",
+      "module_code": "data_tracking"
+    },
+    {
+      "id": "60005",
+      "app_id": "1",
+      "module_code": "log_service"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tapp_id\tmodule_code\n30001\t1\tuser_management\n30002\t1\tmessage_center\n30003\t1\tpush_service\n30004\t1\tdata_tracking\n30005\t1\tlog_service\n60001\t1\tuser_management\n60002\t1\tmessage_center\n60003\t1\tpush_service\n60004\t1\tdata_tracking\n60005\t1\tlog_service\n",
+  "stderr": "",
+  "execution_time_ms": 1514
+}

@@ -63,6 +63,7 @@ cors:
     - "https://5173-iyqesyvospvia1wfcv2hb-7632b986.us1.manus.computer"
     - "https://8080-iyqesyvospvia1wfcv2hb-7632b986.us1.manus.computer"
     - "https://5173-in0e3kpbnuhysw8mp04eq-d21edce7.sg1.manus.computer"
+    - "https://5174-in0e3kpbnuhysw8mp04eq-d21edce7.sg1.manus.computer"
     - "https://8080-in0e3kpbnuhysw8mp04eq-d21edce7.sg1.manus.computer"
   allow_methods:
     - GET

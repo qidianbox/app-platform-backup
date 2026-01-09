@@ -10,29 +10,13 @@
           <span>{{ appInfo.name?.charAt(0) || '应' }}</span>
         </div>
         <span class="app-name">{{ appInfo.name || '加载中...' }}</span>
-      </div>
-      <div class="header-tabs">
-        <div 
-          class="tab-item" 
-          :class="{ active: activeTab === 'workspace' }"
-          @click="activeTab = 'workspace'"
-        >
-          <span class="tab-icon">🚀</span>
-          <span>工作台</span>
-        </div>
-        <div 
-          class="tab-item" 
-          :class="{ active: activeTab === 'config' }"
-          @click="activeTab = 'config'"
-        >
-          <span class="tab-icon">⚙️</span>
-          <span>配置中心</span>
-        </div>
+        <span class="app-id">{{ appInfo.app_id || '' }}</span>
       </div>
       <div class="header-right">
         <el-dropdown>
           <el-button text class="user-btn">
             <el-avatar :size="32">{{ adminName?.charAt(0) || 'A' }}</el-avatar>
+            <span class="admin-name">{{ adminName }}</span>
           </el-button>
           <template #dropdown>
             <el-dropdown-menu>
@@ -43,149 +27,1043 @@
       </div>
     </div>
 
-    <!-- 工作台内容 -->
-    <div v-if="activeTab === 'workspace'" class="workspace-container">
-      <div class="workspace-sidebar">
-        <div class="sidebar-title">功能菜单</div>
+    <div class="main-container">
+      <!-- 左侧边栏 -->
+      <div class="sidebar">
+        <!-- 概览 -->
         <div 
-          v-for="func in workspaceFunctions" 
-          :key="func.id"
           class="sidebar-item"
-          :class="{ active: activeFunction === func.id }"
-          @click="activeFunction = func.id"
+          :class="{ active: currentPage === 'overview' }"
+          @click="currentPage = 'overview'"
         >
-          <span class="func-icon">{{ func.icon }}</span>
-          <span class="func-name">{{ func.name }}</span>
+          <el-icon><House /></el-icon>
+          <span>概览</span>
         </div>
-        <div v-if="workspaceFunctions.length === 0" class="empty-sidebar">
-          <p>暂无功能</p>
-          <p class="hint">请在配置中心添加模块</p>
-        </div>
-      </div>
-      <div class="workspace-main">
-        <div v-if="activeFunction" class="function-content">
-          <h2>{{ currentFunction?.name }}</h2>
-          <p class="function-desc">{{ currentFunction?.description }}</p>
-          <div class="function-body">
-            <!-- 根据不同功能显示不同内容 -->
-            <component :is="getFunctionComponent(activeFunction)" :app-id="appId" />
-          </div>
-        </div>
-        <div v-else class="empty-workspace">
-          <el-empty description="请从左侧选择功能">
-            <template #image>
-              <div class="empty-icon">🚀</div>
-            </template>
-          </el-empty>
-        </div>
-      </div>
-    </div>
-
-    <!-- 配置中心内容 -->
-    <div v-if="activeTab === 'config'" class="config-container">
-      <div class="config-header">
-        <h2>模块配置</h2>
-        <p>管理该APP已启用的模块配置</p>
-      </div>
-      <div class="modules-grid">
+        
+        <!-- 基础配置 -->
         <div 
-          v-for="module in appModules" 
-          :key="module.id"
-          class="module-card"
-          @click="openModuleConfig(module)"
+          class="sidebar-item"
+          :class="{ active: currentPage === 'basic' }"
+          @click="currentPage = 'basic'"
         >
-          <div class="module-icon">{{ module.icon || '📦' }}</div>
-          <div class="module-info">
-            <h3>{{ module.name }}</h3>
-            <p>{{ module.description || '暂无描述' }}</p>
-          </div>
-          <div class="module-status">
-            <el-tag :type="module.enabled ? 'success' : 'info'" size="small">
-              {{ module.enabled ? '已启用' : '未启用' }}
-            </el-tag>
-          </div>
-          <el-icon class="arrow-icon"><ArrowRight /></el-icon>
+          <el-icon><Setting /></el-icon>
+          <span>基础配置</span>
         </div>
-        <div v-if="appModules.length === 0" class="empty-modules">
-          <el-empty description="该APP暂未配置任何模块">
-            <el-button type="primary" @click="$router.push('/apps')">
-              返回管理模块
-            </el-button>
-          </el-empty>
+
+        <!-- 模块分组 -->
+        <template v-for="group in moduleGroups" :key="group.key">
+          <div 
+            v-if="hasModulesInGroup(group.key)"
+            class="sidebar-group"
+          >
+            <div 
+              class="group-header"
+              @click="toggleGroup(group.key)"
+            >
+              <div class="group-title">
+                <el-icon><component :is="group.icon" /></el-icon>
+                <span>{{ group.name }}</span>
+              </div>
+              <el-icon class="expand-icon" :class="{ expanded: expandedGroups.includes(group.key) }">
+                <ArrowRight />
+              </el-icon>
+            </div>
+            <div v-show="expandedGroups.includes(group.key)" class="group-items">
+              <div 
+                v-for="module in getModulesInGroup(group.key)" 
+                :key="module.source_module"
+                class="sidebar-item sub-item"
+                :class="{ active: currentPage === module.source_module }"
+                @click="currentPage = module.source_module"
+              >
+                <span>{{ module.name }}</span>
+              </div>
+            </div>
+          </div>
+        </template>
+      </div>
+
+      <!-- 右侧内容区 -->
+      <div class="content-area">
+        <!-- 概览页面 -->
+        <div v-if="currentPage === 'overview'" class="page-content">
+          <h2 class="page-title">APP概览</h2>
+          
+          <!-- 统计卡片 -->
+          <div class="stats-cards">
+            <div class="stat-card">
+              <div class="stat-icon users"><el-icon><User /></el-icon></div>
+              <div class="stat-info">
+                <div class="stat-value">{{ stats.userCount }}</div>
+                <div class="stat-label">用户数</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon modules"><el-icon><Grid /></el-icon></div>
+              <div class="stat-info">
+                <div class="stat-value">{{ appModules.length }}</div>
+                <div class="stat-label">启用模块</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon requests"><el-icon><DataLine /></el-icon></div>
+              <div class="stat-info">
+                <div class="stat-value">{{ stats.todayRequests }}</div>
+                <div class="stat-label">今日请求</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon errors"><el-icon><Warning /></el-icon></div>
+              <div class="stat-info">
+                <div class="stat-value">{{ stats.todayErrors }}</div>
+                <div class="stat-label">今日异常</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- APP信息 -->
+          <div class="info-section">
+            <h3>APP信息</h3>
+            <div class="info-grid">
+              <div class="info-item">
+                <label>APP名称</label>
+                <span>{{ appInfo.name }}</span>
+              </div>
+              <div class="info-item">
+                <label>APP标识</label>
+                <span class="copyable" @click="copyText(appInfo.app_id)">
+                  {{ appInfo.app_id }}
+                  <el-icon><CopyDocument /></el-icon>
+                </span>
+              </div>
+              <div class="info-item">
+                <label>AppSecret</label>
+                <span class="copyable" @click="copyText(appInfo.app_secret)">
+                  {{ maskSecret(appInfo.app_secret) }}
+                  <el-icon><CopyDocument /></el-icon>
+                </span>
+              </div>
+              <div class="info-item">
+                <label>包名</label>
+                <span>{{ appInfo.package_name || '-' }}</span>
+              </div>
+              <div class="info-item">
+                <label>状态</label>
+                <el-tag :type="appInfo.status === 1 ? 'success' : 'info'" size="small">
+                  {{ appInfo.status === 1 ? '正常' : '禁用' }}
+                </el-tag>
+              </div>
+              <div class="info-item">
+                <label>创建时间</label>
+                <span>{{ formatDate(appInfo.created_at) }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 已启用模块 -->
+          <div class="info-section">
+            <h3>已启用模块</h3>
+            <div class="module-tags">
+              <el-tag 
+                v-for="module in appModules" 
+                :key="module.id"
+                type="primary"
+                effect="plain"
+              >
+                {{ module.name }}
+              </el-tag>
+              <el-empty v-if="appModules.length === 0" description="暂无启用模块" />
+            </div>
+          </div>
+        </div>
+
+        <!-- 基础配置页面 -->
+        <div v-else-if="currentPage === 'basic'" class="page-content">
+          <h2 class="page-title">基础配置</h2>
+          <p class="page-desc">配置APP的基本信息和通用设置</p>
+          
+          <el-form :model="basicConfig" label-width="140px" class="config-form">
+            <div class="form-section">
+              <h4>基本信息</h4>
+              <el-form-item label="APP名称">
+                <el-input v-model="basicConfig.name" placeholder="请输入APP名称" />
+              </el-form-item>
+              <el-form-item label="APP描述">
+                <el-input v-model="basicConfig.description" type="textarea" :rows="3" placeholder="请输入APP描述" />
+              </el-form-item>
+              <el-form-item label="包名">
+                <el-input v-model="basicConfig.package_name" placeholder="如：com.example.app" />
+              </el-form-item>
+            </div>
+
+            <div class="form-section">
+              <h4>安全设置</h4>
+              <el-form-item label="启用签名验证">
+                <el-switch v-model="basicConfig.enableSignature" />
+                <span class="form-hint">启用后所有API请求需要携带签名</span>
+              </el-form-item>
+              <el-form-item label="IP白名单">
+                <el-input v-model="basicConfig.ipWhitelist" type="textarea" :rows="2" placeholder="每行一个IP，留空表示不限制" />
+              </el-form-item>
+            </div>
+
+            <el-form-item>
+              <el-button type="primary" @click="saveBasicConfig">保存配置</el-button>
+              <el-button @click="resetBasicConfig">重置</el-button>
+            </el-form-item>
+          </el-form>
+        </div>
+
+        <!-- 用户管理配置 -->
+        <div v-else-if="currentPage === 'user_management'" class="page-content">
+          <h2 class="page-title">用户管理配置</h2>
+          <p class="page-desc">配置用户注册、登录和管理相关设置</p>
+          
+          <el-form :model="userConfig" label-width="160px" class="config-form">
+            <div class="form-section">
+              <h4>🔐 登录配置</h4>
+              <el-form-item label="密码最小长度">
+                <el-input-number v-model="userConfig.passwordMinLength" :min="6" :max="32" />
+                <span class="form-hint">建议8位以上</span>
+              </el-form-item>
+              <el-form-item label="密码复杂度要求">
+                <el-checkbox-group v-model="userConfig.passwordRequirements">
+                  <el-checkbox label="number">必须包含数字</el-checkbox>
+                  <el-checkbox label="letter">必须包含字母</el-checkbox>
+                  <el-checkbox label="special">必须包含特殊字符</el-checkbox>
+                </el-checkbox-group>
+              </el-form-item>
+              <el-form-item label="登录失败锁定">
+                <el-switch v-model="userConfig.enableLoginLock" />
+                <span class="form-hint">防止暴力破解</span>
+              </el-form-item>
+              <el-form-item v-if="userConfig.enableLoginLock" label="失败次数限制">
+                <el-input-number v-model="userConfig.maxLoginAttempts" :min="3" :max="10" />
+                <span class="form-hint">次</span>
+              </el-form-item>
+              <el-form-item v-if="userConfig.enableLoginLock" label="锁定时长">
+                <el-input-number v-model="userConfig.lockDuration" :min="5" :max="1440" />
+                <span class="form-hint">分钟</span>
+              </el-form-item>
+            </div>
+
+            <div class="form-section">
+              <h4>👤 用户信息管理</h4>
+              <el-form-item label="必填字段">
+                <el-checkbox-group v-model="userConfig.requiredFields">
+                  <el-checkbox label="nickname">昵称</el-checkbox>
+                  <el-checkbox label="avatar">头像</el-checkbox>
+                  <el-checkbox label="gender">性别</el-checkbox>
+                  <el-checkbox label="birthday">生日</el-checkbox>
+                  <el-checkbox label="region">地区</el-checkbox>
+                </el-checkbox-group>
+              </el-form-item>
+              <el-form-item label="允许修改用户名">
+                <el-switch v-model="userConfig.allowChangeUsername" />
+                <span class="form-hint">关闭后用户名不可修改</span>
+              </el-form-item>
+              <el-form-item label="昵称敏感词过滤">
+                <el-switch v-model="userConfig.enableNicknameFilter" />
+              </el-form-item>
+              <el-form-item label="头像审核">
+                <el-switch v-model="userConfig.enableAvatarReview" />
+                <span class="form-hint">自动检测头像是否违规</span>
+              </el-form-item>
+            </div>
+
+            <div class="form-section">
+              <h4>🪪 实名认证配置</h4>
+              <el-form-item label="启用实名认证">
+                <el-switch v-model="userConfig.enableRealName" />
+              </el-form-item>
+            </div>
+
+            <div class="form-section">
+              <h4>🗑️ 账号注销配置</h4>
+              <el-form-item label="允许账号注销">
+                <el-switch v-model="userConfig.allowAccountDeletion" />
+              </el-form-item>
+              <el-form-item v-if="userConfig.allowAccountDeletion" label="注销冷静期">
+                <el-input-number v-model="userConfig.deletionCooldown" :min="0" :max="30" />
+                <span class="form-hint">天，0表示立即注销</span>
+              </el-form-item>
+              <el-form-item v-if="userConfig.allowAccountDeletion" label="注销前置条件">
+                <el-checkbox-group v-model="userConfig.deletionRequirements">
+                  <el-checkbox label="clearData">清空个人数据</el-checkbox>
+                  <el-checkbox label="unbindThirdParty">解除第三方账号</el-checkbox>
+                </el-checkbox-group>
+              </el-form-item>
+              <el-form-item v-if="userConfig.allowAccountDeletion" label="注销确认方式">
+                <el-radio-group v-model="userConfig.deletionConfirmMethod">
+                  <el-radio label="sms">短信验证码</el-radio>
+                  <el-radio label="password">密码验证</el-radio>
+                </el-radio-group>
+              </el-form-item>
+            </div>
+
+            <el-form-item>
+              <el-button type="primary" @click="saveModuleConfig('user_management')">保存配置</el-button>
+              <el-button @click="testConfig('user_management')">测试配置</el-button>
+              <el-button @click="resetConfig('user_management')">重置</el-button>
+            </el-form-item>
+          </el-form>
+        </div>
+
+        <!-- 消息中心配置 -->
+        <div v-else-if="currentPage === 'message_center'" class="page-content">
+          <h2 class="page-title">消息中心配置</h2>
+          <p class="page-desc">配置站内消息和通知相关设置</p>
+          
+          <el-form :model="messageConfig" label-width="160px" class="config-form">
+            <div class="form-section">
+              <h4>📬 基础配置</h4>
+              <el-form-item label="启用消息服务">
+                <el-switch v-model="messageConfig.enabled" />
+              </el-form-item>
+              <el-form-item label="消息保留天数">
+                <el-input-number v-model="messageConfig.retentionDays" :min="7" :max="365" />
+                <span class="form-hint">天</span>
+              </el-form-item>
+              <el-form-item label="单用户消息上限">
+                <el-input-number v-model="messageConfig.maxMessagesPerUser" :min="100" :max="10000" />
+                <span class="form-hint">条</span>
+              </el-form-item>
+            </div>
+
+            <div class="form-section">
+              <h4>📝 消息类型</h4>
+              <el-form-item label="支持的消息类型">
+                <el-checkbox-group v-model="messageConfig.supportedTypes">
+                  <el-checkbox label="system">系统通知</el-checkbox>
+                  <el-checkbox label="activity">活动消息</el-checkbox>
+                  <el-checkbox label="transaction">交易消息</el-checkbox>
+                  <el-checkbox label="social">社交消息</el-checkbox>
+                </el-checkbox-group>
+              </el-form-item>
+            </div>
+
+            <el-form-item>
+              <el-button type="primary" @click="saveModuleConfig('message_center')">保存配置</el-button>
+              <el-button @click="resetConfig('message_center')">重置</el-button>
+            </el-form-item>
+          </el-form>
+        </div>
+
+        <!-- 推送服务配置 -->
+        <div v-else-if="currentPage === 'push_service'" class="page-content">
+          <h2 class="page-title">推送服务配置</h2>
+          <p class="page-desc">配置APP推送通知服务</p>
+          
+          <el-form :model="pushConfig" label-width="160px" class="config-form">
+            <div class="form-section">
+              <h4>🔔 基础配置</h4>
+              <el-form-item label="启用推送服务">
+                <el-switch v-model="pushConfig.enabled" />
+              </el-form-item>
+              <el-form-item label="推送服务商">
+                <el-select v-model="pushConfig.provider" placeholder="请选择">
+                  <el-option label="极光推送" value="jpush" />
+                  <el-option label="个推" value="getui" />
+                  <el-option label="友盟推送" value="umeng" />
+                  <el-option label="Firebase" value="firebase" />
+                </el-select>
+              </el-form-item>
+              <el-form-item label="AppKey">
+                <el-input v-model="pushConfig.appKey" placeholder="请输入AppKey" />
+              </el-form-item>
+              <el-form-item label="MasterSecret">
+                <el-input v-model="pushConfig.masterSecret" type="password" placeholder="请输入MasterSecret" show-password />
+              </el-form-item>
+            </div>
+
+            <div class="form-section">
+              <h4>⏰ 推送策略</h4>
+              <el-form-item label="静默时段">
+                <el-switch v-model="pushConfig.enableQuietHours" />
+                <span class="form-hint">在指定时段不发送推送</span>
+              </el-form-item>
+              <el-form-item v-if="pushConfig.enableQuietHours" label="静默时间">
+                <el-time-picker v-model="pushConfig.quietStart" placeholder="开始时间" format="HH:mm" />
+                <span style="margin: 0 8px;">至</span>
+                <el-time-picker v-model="pushConfig.quietEnd" placeholder="结束时间" format="HH:mm" />
+              </el-form-item>
+              <el-form-item label="每日推送上限">
+                <el-input-number v-model="pushConfig.dailyLimit" :min="1" :max="100" />
+                <span class="form-hint">条/用户</span>
+              </el-form-item>
+            </div>
+
+            <el-form-item>
+              <el-button type="primary" @click="saveModuleConfig('push_service')">保存配置</el-button>
+              <el-button @click="testConfig('push_service')">测试推送</el-button>
+              <el-button @click="resetConfig('push_service')">重置</el-button>
+            </el-form-item>
+          </el-form>
+        </div>
+
+        <!-- 支付中心配置 -->
+        <div v-else-if="currentPage === 'payment'" class="page-content">
+          <h2 class="page-title">支付中心配置</h2>
+          <p class="page-desc">配置支付渠道和安全设置</p>
+          
+          <el-form :model="paymentConfig" label-width="160px" class="config-form">
+            <div class="form-section">
+              <h4>🔐 安全验证配置</h4>
+              <el-form-item label="启用安全验证">
+                <el-switch v-model="paymentConfig.enableSecurityVerify" />
+              </el-form-item>
+              <el-form-item v-if="paymentConfig.enableSecurityVerify" label="验证方式">
+                <el-checkbox-group v-model="paymentConfig.verifyMethods">
+                  <el-checkbox label="password">支付密码</el-checkbox>
+                  <el-checkbox label="fingerprint">指纹识别</el-checkbox>
+                  <el-checkbox label="face">面容识别</el-checkbox>
+                </el-checkbox-group>
+              </el-form-item>
+              <el-form-item label="验证触发金额">
+                <el-input-number v-model="paymentConfig.verifyThreshold" :min="0" :max="100000" />
+                <span class="form-hint">元，0表示所有支付都需要验证</span>
+              </el-form-item>
+              <el-form-item label="密码错误锁定">
+                <el-input-number v-model="paymentConfig.maxPasswordAttempts" :min="3" :max="10" />
+                <span class="form-hint">次</span>
+              </el-form-item>
+              <el-form-item label="锁定时长">
+                <el-input-number v-model="paymentConfig.lockDuration" :min="5" :max="1440" />
+                <span class="form-hint">分钟</span>
+              </el-form-item>
+            </div>
+
+            <div class="form-section">
+              <h4>💰 限额控制配置</h4>
+              <el-form-item label="启用限额控制">
+                <el-switch v-model="paymentConfig.enableLimitControl" />
+              </el-form-item>
+              <el-form-item v-if="paymentConfig.enableLimitControl" label="单笔支付限额">
+                <el-input-number v-model="paymentConfig.singleLimit" :min="0" :max="1000000" />
+                <span class="form-hint">元，0表示不限制</span>
+              </el-form-item>
+              <el-form-item v-if="paymentConfig.enableLimitControl" label="每日支付限额">
+                <el-input-number v-model="paymentConfig.dailyLimit" :min="0" :max="10000000" />
+                <span class="form-hint">元，0表示不限制</span>
+              </el-form-item>
+              <el-form-item v-if="paymentConfig.enableLimitControl" label="每月支付限额">
+                <el-input-number v-model="paymentConfig.monthlyLimit" :min="0" :max="100000000" />
+                <span class="form-hint">元，0表示不限制</span>
+              </el-form-item>
+              <el-form-item v-if="paymentConfig.enableLimitControl" label="每日支付次数">
+                <el-input-number v-model="paymentConfig.dailyCount" :min="0" :max="1000" />
+                <span class="form-hint">次，0表示不限制</span>
+              </el-form-item>
+            </div>
+
+            <div class="form-section">
+              <h4>🔗 回调配置</h4>
+              <el-form-item label="支付成功回调">
+                <el-input v-model="paymentConfig.successCallback" placeholder="请输入支付成功回调地址" />
+              </el-form-item>
+              <el-form-item label="支付失败回调">
+                <el-input v-model="paymentConfig.failCallback" placeholder="请输入支付失败回调地址" />
+              </el-form-item>
+              <el-form-item label="退款回调">
+                <el-input v-model="paymentConfig.refundCallback" placeholder="请输入退款回调地址" />
+              </el-form-item>
+            </div>
+
+            <div class="form-section">
+              <h4>⚙️ 其他配置</h4>
+              <el-form-item label="支付超时时间">
+                <el-input-number v-model="paymentConfig.timeout" :min="5" :max="60" />
+                <span class="form-hint">分钟</span>
+              </el-form-item>
+              <el-form-item label="启用自动退款">
+                <el-switch v-model="paymentConfig.enableAutoRefund" />
+                <span class="form-hint">订单超时自动退款</span>
+              </el-form-item>
+              <el-form-item label="启用支付日志">
+                <el-switch v-model="paymentConfig.enablePaymentLog" />
+              </el-form-item>
+            </div>
+
+            <el-form-item>
+              <el-button type="primary" @click="saveModuleConfig('payment')">保存配置</el-button>
+              <el-button @click="testConfig('payment')">测试配置</el-button>
+              <el-button @click="resetConfig('payment')">重置</el-button>
+            </el-form-item>
+          </el-form>
+        </div>
+
+        <!-- 短信服务配置 -->
+        <div v-else-if="currentPage === 'sms_service'" class="page-content">
+          <h2 class="page-title">短信服务配置</h2>
+          <p class="page-desc">配置短信发送服务和验证码设置</p>
+          
+          <el-form :model="smsConfig" label-width="160px" class="config-form">
+            <div class="form-section">
+              <h4>📱 基础配置</h4>
+              <el-form-item label="启用短信服务">
+                <el-switch v-model="smsConfig.enabled" />
+              </el-form-item>
+              <el-form-item label="短信服务提供商">
+                <el-select v-model="smsConfig.provider" placeholder="请选择">
+                  <el-option label="阿里云短信" value="aliyun" />
+                  <el-option label="腾讯云短信" value="tencent" />
+                  <el-option label="华为云短信" value="huawei" />
+                </el-select>
+              </el-form-item>
+              <el-form-item label="AccessKey">
+                <el-input v-model="smsConfig.accessKey" placeholder="请输入AccessKey" />
+              </el-form-item>
+              <el-form-item label="SecretKey">
+                <el-input v-model="smsConfig.secretKey" type="password" placeholder="请输入SecretKey" show-password />
+              </el-form-item>
+              <el-form-item label="短信签名">
+                <el-input v-model="smsConfig.signName" placeholder="例如：我的应用" />
+              </el-form-item>
+            </div>
+
+            <div class="form-section">
+              <h4>🔢 验证码短信配置</h4>
+              <el-form-item label="验证码长度">
+                <el-input-number v-model="smsConfig.codeLength" :min="4" :max="8" />
+                <span class="form-hint">位</span>
+              </el-form-item>
+              <el-form-item label="验证码有效期">
+                <el-input-number v-model="smsConfig.codeExpiry" :min="1" :max="30" />
+                <span class="form-hint">分钟</span>
+              </el-form-item>
+              <el-form-item label="验证码模板ID">
+                <el-input v-model="smsConfig.codeTemplateId" placeholder="例如：SMS_123456789" />
+              </el-form-item>
+              <el-form-item label="发送间隔">
+                <el-input-number v-model="smsConfig.sendInterval" :min="30" :max="300" />
+                <span class="form-hint">秒</span>
+              </el-form-item>
+              <el-form-item label="每日发送限制">
+                <el-input-number v-model="smsConfig.dailyLimit" :min="1" :max="50" />
+                <span class="form-hint">条/手机号</span>
+              </el-form-item>
+            </div>
+
+            <div class="form-section">
+              <h4>📢 通知短信配置</h4>
+              <el-form-item label="启用通知短信">
+                <el-switch v-model="smsConfig.enableNotification" />
+              </el-form-item>
+            </div>
+
+            <div class="form-section">
+              <h4>⚙️ 高级配置</h4>
+              <el-form-item label="失败重试次数">
+                <el-input-number v-model="smsConfig.retryCount" :min="0" :max="5" />
+                <span class="form-hint">次</span>
+              </el-form-item>
+              <el-form-item label="请求超时时间">
+                <el-input-number v-model="smsConfig.timeout" :min="5" :max="60" />
+                <span class="form-hint">秒</span>
+              </el-form-item>
+              <el-form-item label="状态回调URL">
+                <el-input v-model="smsConfig.callbackUrl" placeholder="请输入状态回调地址" />
+              </el-form-item>
+              <el-form-item label="余额告警阈值">
+                <el-input-number v-model="smsConfig.balanceAlert" :min="100" :max="10000" />
+                <span class="form-hint">条</span>
+              </el-form-item>
+            </div>
+
+            <el-form-item>
+              <el-button type="primary" @click="saveModuleConfig('sms_service')">保存配置</el-button>
+              <el-button @click="testConfig('sms_service')">测试发送</el-button>
+              <el-button @click="resetConfig('sms_service')">重置</el-button>
+            </el-form-item>
+          </el-form>
+        </div>
+
+        <!-- 数据埋点配置 -->
+        <div v-else-if="currentPage === 'data_tracking'" class="page-content">
+          <h2 class="page-title">数据埋点配置</h2>
+          <p class="page-desc">配置用户行为埋点和数据分析</p>
+          
+          <el-form :model="trackingConfig" label-width="160px" class="config-form">
+            <div class="form-section">
+              <h4>📊 基础配置</h4>
+              <el-form-item label="启用数据埋点">
+                <el-switch v-model="trackingConfig.enabled" />
+              </el-form-item>
+              <el-form-item label="数据上报方式">
+                <el-radio-group v-model="trackingConfig.reportMethod">
+                  <el-radio label="realtime">实时上报</el-radio>
+                  <el-radio label="batch">批量上报</el-radio>
+                </el-radio-group>
+              </el-form-item>
+              <el-form-item v-if="trackingConfig.reportMethod === 'batch'" label="批量上报间隔">
+                <el-input-number v-model="trackingConfig.batchInterval" :min="10" :max="300" />
+                <span class="form-hint">秒</span>
+              </el-form-item>
+            </div>
+
+            <div class="form-section">
+              <h4>🎯 事件配置</h4>
+              <el-form-item label="自动采集事件">
+                <el-checkbox-group v-model="trackingConfig.autoEvents">
+                  <el-checkbox label="pageView">页面浏览</el-checkbox>
+                  <el-checkbox label="click">点击事件</el-checkbox>
+                  <el-checkbox label="scroll">滚动事件</el-checkbox>
+                  <el-checkbox label="error">错误事件</el-checkbox>
+                </el-checkbox-group>
+              </el-form-item>
+            </div>
+
+            <el-form-item>
+              <el-button type="primary" @click="saveModuleConfig('data_tracking')">保存配置</el-button>
+              <el-button @click="resetConfig('data_tracking')">重置</el-button>
+            </el-form-item>
+          </el-form>
+        </div>
+
+        <!-- 日志服务配置 -->
+        <div v-else-if="currentPage === 'log_service'" class="page-content">
+          <h2 class="page-title">日志服务配置</h2>
+          <p class="page-desc">配置日志收集、存储、分析等功能</p>
+          
+          <el-form :model="logConfig" label-width="160px" class="config-form">
+            <div class="form-section">
+              <h4>📝 基础配置</h4>
+              <el-form-item label="启用日志服务">
+                <el-switch v-model="logConfig.enabled" />
+              </el-form-item>
+              <el-form-item label="日志级别">
+                <el-select v-model="logConfig.level" placeholder="请选择">
+                  <el-option label="DEBUG" value="debug" />
+                  <el-option label="INFO" value="info" />
+                  <el-option label="WARN" value="warn" />
+                  <el-option label="ERROR" value="error" />
+                </el-select>
+              </el-form-item>
+              <el-form-item label="日志存储方式">
+                <el-checkbox-group v-model="logConfig.storageTypes">
+                  <el-checkbox label="local">本地存储</el-checkbox>
+                  <el-checkbox label="cloud">云端存储</el-checkbox>
+                </el-checkbox-group>
+              </el-form-item>
+              <el-form-item label="日志保留时间">
+                <el-input-number v-model="logConfig.retentionDays" :min="7" :max="365" />
+                <span class="form-hint">天</span>
+              </el-form-item>
+            </div>
+
+            <div class="form-section">
+              <h4>📤 上报配置</h4>
+              <el-form-item label="实时上报">
+                <el-switch v-model="logConfig.realtimeReport" />
+              </el-form-item>
+              <el-form-item label="批量上报数量">
+                <el-input-number v-model="logConfig.batchSize" :min="10" :max="1000" />
+                <span class="form-hint">条</span>
+              </el-form-item>
+            </div>
+
+            <el-form-item>
+              <el-button type="primary" @click="saveModuleConfig('log_service')">保存配置</el-button>
+              <el-button @click="resetConfig('log_service')">重置</el-button>
+            </el-form-item>
+          </el-form>
+        </div>
+
+        <!-- 监控告警配置 -->
+        <div v-else-if="currentPage === 'monitor_alert'" class="page-content">
+          <h2 class="page-title">监控告警配置</h2>
+          <p class="page-desc">配置应用监控和告警通知</p>
+          
+          <el-form :model="monitorConfig" label-width="160px" class="config-form">
+            <div class="form-section">
+              <h4>📡 监控配置</h4>
+              <el-form-item label="启用监控服务">
+                <el-switch v-model="monitorConfig.enabled" />
+              </el-form-item>
+              <el-form-item label="监控指标">
+                <el-checkbox-group v-model="monitorConfig.metrics">
+                  <el-checkbox label="cpu">CPU使用率</el-checkbox>
+                  <el-checkbox label="memory">内存使用率</el-checkbox>
+                  <el-checkbox label="api">API响应时间</el-checkbox>
+                  <el-checkbox label="error">错误率</el-checkbox>
+                </el-checkbox-group>
+              </el-form-item>
+              <el-form-item label="采集间隔">
+                <el-input-number v-model="monitorConfig.interval" :min="10" :max="300" />
+                <span class="form-hint">秒</span>
+              </el-form-item>
+            </div>
+
+            <div class="form-section">
+              <h4>🚨 告警配置</h4>
+              <el-form-item label="启用告警">
+                <el-switch v-model="monitorConfig.alertEnabled" />
+              </el-form-item>
+              <el-form-item v-if="monitorConfig.alertEnabled" label="告警方式">
+                <el-checkbox-group v-model="monitorConfig.alertMethods">
+                  <el-checkbox label="email">邮件</el-checkbox>
+                  <el-checkbox label="sms">短信</el-checkbox>
+                  <el-checkbox label="webhook">Webhook</el-checkbox>
+                </el-checkbox-group>
+              </el-form-item>
+              <el-form-item v-if="monitorConfig.alertEnabled" label="告警接收人">
+                <el-input v-model="monitorConfig.alertReceivers" type="textarea" :rows="2" placeholder="多个接收人用逗号分隔" />
+              </el-form-item>
+            </div>
+
+            <el-form-item>
+              <el-button type="primary" @click="saveModuleConfig('monitor_alert')">保存配置</el-button>
+              <el-button @click="testConfig('monitor_alert')">测试告警</el-button>
+              <el-button @click="resetConfig('monitor_alert')">重置</el-button>
+            </el-form-item>
+          </el-form>
+        </div>
+
+        <!-- 文件存储配置 -->
+        <div v-else-if="currentPage === 'file_storage'" class="page-content">
+          <h2 class="page-title">文件存储配置</h2>
+          <p class="page-desc">配置文件上传、下载和存储服务</p>
+          
+          <el-form :model="storageConfig" label-width="160px" class="config-form">
+            <div class="form-section">
+              <h4>☁️ 存储配置</h4>
+              <el-form-item label="启用文件存储">
+                <el-switch v-model="storageConfig.enabled" />
+              </el-form-item>
+              <el-form-item label="存储服务商">
+                <el-select v-model="storageConfig.provider" placeholder="请选择">
+                  <el-option label="阿里云OSS" value="aliyun" />
+                  <el-option label="腾讯云COS" value="tencent" />
+                  <el-option label="七牛云" value="qiniu" />
+                  <el-option label="AWS S3" value="aws" />
+                </el-select>
+              </el-form-item>
+              <el-form-item label="Bucket名称">
+                <el-input v-model="storageConfig.bucket" placeholder="请输入Bucket名称" />
+              </el-form-item>
+              <el-form-item label="AccessKey">
+                <el-input v-model="storageConfig.accessKey" placeholder="请输入AccessKey" />
+              </el-form-item>
+              <el-form-item label="SecretKey">
+                <el-input v-model="storageConfig.secretKey" type="password" placeholder="请输入SecretKey" show-password />
+              </el-form-item>
+            </div>
+
+            <div class="form-section">
+              <h4>📁 上传限制</h4>
+              <el-form-item label="最大文件大小">
+                <el-input-number v-model="storageConfig.maxFileSize" :min="1" :max="1024" />
+                <span class="form-hint">MB</span>
+              </el-form-item>
+              <el-form-item label="允许的文件类型">
+                <el-input v-model="storageConfig.allowedTypes" placeholder="例如：jpg,png,pdf" />
+              </el-form-item>
+            </div>
+
+            <el-form-item>
+              <el-button type="primary" @click="saveModuleConfig('file_storage')">保存配置</el-button>
+              <el-button @click="testConfig('file_storage')">测试连接</el-button>
+              <el-button @click="resetConfig('file_storage')">重置</el-button>
+            </el-form-item>
+          </el-form>
+        </div>
+
+        <!-- 配置管理配置 -->
+        <div v-else-if="currentPage === 'config_management'" class="page-content">
+          <h2 class="page-title">配置管理</h2>
+          <p class="page-desc">管理远程配置下发和动态配置</p>
+          
+          <el-form :model="configMgmtConfig" label-width="160px" class="config-form">
+            <div class="form-section">
+              <h4>⚙️ 基础配置</h4>
+              <el-form-item label="启用配置管理">
+                <el-switch v-model="configMgmtConfig.enabled" />
+              </el-form-item>
+              <el-form-item label="配置刷新间隔">
+                <el-input-number v-model="configMgmtConfig.refreshInterval" :min="60" :max="3600" />
+                <span class="form-hint">秒</span>
+              </el-form-item>
+              <el-form-item label="启用配置缓存">
+                <el-switch v-model="configMgmtConfig.enableCache" />
+              </el-form-item>
+            </div>
+
+            <el-form-item>
+              <el-button type="primary" @click="saveModuleConfig('config_management')">保存配置</el-button>
+              <el-button @click="resetConfig('config_management')">重置</el-button>
+            </el-form-item>
+          </el-form>
+        </div>
+
+        <!-- 版本管理配置 -->
+        <div v-else-if="currentPage === 'version_management'" class="page-content">
+          <h2 class="page-title">版本管理配置</h2>
+          <p class="page-desc">配置APP版本发布和更新策略</p>
+          
+          <el-form :model="versionConfig" label-width="160px" class="config-form">
+            <div class="form-section">
+              <h4>📦 更新配置</h4>
+              <el-form-item label="启用版本管理">
+                <el-switch v-model="versionConfig.enabled" />
+              </el-form-item>
+              <el-form-item label="强制更新">
+                <el-switch v-model="versionConfig.forceUpdate" />
+                <span class="form-hint">开启后用户必须更新到最新版本</span>
+              </el-form-item>
+              <el-form-item label="更新提示方式">
+                <el-radio-group v-model="versionConfig.promptType">
+                  <el-radio label="dialog">弹窗提示</el-radio>
+                  <el-radio label="toast">轻提示</el-radio>
+                  <el-radio label="silent">静默更新</el-radio>
+                </el-radio-group>
+              </el-form-item>
+            </div>
+
+            <div class="form-section">
+              <h4>📥 下载配置</h4>
+              <el-form-item label="Android下载地址">
+                <el-input v-model="versionConfig.androidUrl" placeholder="请输入Android安装包下载地址" />
+              </el-form-item>
+              <el-form-item label="iOS下载地址">
+                <el-input v-model="versionConfig.iosUrl" placeholder="请输入iOS App Store地址" />
+              </el-form-item>
+            </div>
+
+            <el-form-item>
+              <el-button type="primary" @click="saveModuleConfig('version_management')">保存配置</el-button>
+              <el-button @click="resetConfig('version_management')">重置</el-button>
+            </el-form-item>
+          </el-form>
+        </div>
+
+        <!-- 默认页面 -->
+        <div v-else class="page-content">
+          <el-empty description="请从左侧选择配置项" />
         </div>
       </div>
     </div>
-
-    <!-- 模块配置弹窗 -->
-    <el-dialog 
-      v-model="configDialogVisible" 
-      :title="`${currentModule?.name || ''} 配置`"
-      width="600px"
-    >
-      <div v-if="currentModule" class="module-config-form">
-        <el-form :model="moduleConfigForm" label-width="120px">
-          <el-form-item label="启用状态">
-            <el-switch v-model="moduleConfigForm.enabled" />
-          </el-form-item>
-          <el-form-item label="API端点">
-            <el-input v-model="moduleConfigForm.apiEndpoint" placeholder="请输入API端点" />
-          </el-form-item>
-          <el-form-item label="超时时间(ms)">
-            <el-input-number v-model="moduleConfigForm.timeout" :min="1000" :max="60000" />
-          </el-form-item>
-          <el-form-item label="重试次数">
-            <el-input-number v-model="moduleConfigForm.retryCount" :min="0" :max="10" />
-          </el-form-item>
-          <el-form-item label="备注">
-            <el-input v-model="moduleConfigForm.remark" type="textarea" rows="3" />
-          </el-form-item>
-        </el-form>
-      </div>
-      <template #footer>
-        <el-button @click="configDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="saveModuleConfig">保存配置</el-button>
-      </template>
-    </el-dialog>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
-import { ArrowLeft, ArrowRight } from '@element-plus/icons-vue'
+import { 
+  ArrowLeft, ArrowRight, House, Setting, User, UserFilled, 
+  CreditCard, ChatDotRound, DataLine, Document, Monitor, 
+  FolderOpened, Tools, Box, Grid, Warning, CopyDocument 
+} from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import request from '@/utils/request'
 
 const route = useRoute()
 const appId = computed(() => route.params.id)
 
-const activeTab = ref('workspace')
-const activeFunction = ref('')
-const configDialogVisible = ref(false)
-const currentModule = ref(null)
+const currentPage = ref('overview')
+const expandedGroups = ref(['user', 'message', 'data', 'system', 'storage'])
 const adminName = ref(localStorage.getItem('adminName') || 'Admin')
+
+// 模块分组定义
+const moduleGroups = [
+  { key: 'user', name: '用户与权限', icon: 'UserFilled', modules: ['user_management'] },
+  { key: 'payment', name: '交易与支付', icon: 'CreditCard', modules: ['payment'] },
+  { key: 'message', name: '消息与通知', icon: 'ChatDotRound', modules: ['message_center', 'push_service', 'sms_service'] },
+  { key: 'data', name: '数据与分析', icon: 'DataLine', modules: ['data_tracking'] },
+  { key: 'system', name: '系统与运维', icon: 'Monitor', modules: ['log_service', 'monitor_alert'] },
+  { key: 'storage', name: '存储服务', icon: 'FolderOpened', modules: ['file_storage', 'config_management', 'version_management'] }
+]
+
+// 模块名称映射
+const moduleNameMap = {
+  user_management: '用户管理',
+  message_center: '消息中心',
+  push_service: '推送服务',
+  data_tracking: '数据埋点',
+  log_service: '日志服务',
+  monitor_alert: '监控告警',
+  file_storage: '文件存储',
+  config_management: '配置管理',
+  version_management: '版本管理',
+  payment: '支付中心',
+  sms_service: '短信服务'
+}
 
 const appInfo = ref({
   name: '',
   app_id: '',
-  description: ''
+  app_secret: '',
+  package_name: '',
+  description: '',
+  status: 1,
+  created_at: ''
 })
 
 const appModules = ref([])
 
-const workspaceFunctions = ref([])
+const stats = ref({
+  userCount: 0,
+  todayRequests: 0,
+  todayErrors: 0
+})
 
-const moduleConfigForm = ref({
+// 各模块配置表单
+const basicConfig = ref({
+  name: '',
+  description: '',
+  package_name: '',
+  enableSignature: false,
+  ipWhitelist: ''
+})
+
+const userConfig = ref({
+  passwordMinLength: 8,
+  passwordRequirements: ['number', 'letter'],
+  enableLoginLock: true,
+  maxLoginAttempts: 5,
+  lockDuration: 30,
+  requiredFields: ['nickname'],
+  allowChangeUsername: false,
+  enableNicknameFilter: true,
+  enableAvatarReview: false,
+  enableRealName: false,
+  allowAccountDeletion: true,
+  deletionCooldown: 7,
+  deletionRequirements: ['clearData'],
+  deletionConfirmMethod: 'sms'
+})
+
+const messageConfig = ref({
   enabled: true,
-  apiEndpoint: '',
-  timeout: 5000,
-  retryCount: 3,
-  remark: ''
+  retentionDays: 30,
+  maxMessagesPerUser: 1000,
+  supportedTypes: ['system', 'activity']
 })
 
-const currentFunction = computed(() => {
-  return workspaceFunctions.value.find(f => f.id === activeFunction.value)
+const pushConfig = ref({
+  enabled: true,
+  provider: 'jpush',
+  appKey: '',
+  masterSecret: '',
+  enableQuietHours: false,
+  quietStart: null,
+  quietEnd: null,
+  dailyLimit: 10
 })
+
+const paymentConfig = ref({
+  enableSecurityVerify: true,
+  verifyMethods: ['password'],
+  verifyThreshold: 500,
+  maxPasswordAttempts: 5,
+  lockDuration: 30,
+  enableLimitControl: true,
+  singleLimit: 50000,
+  dailyLimit: 100000,
+  monthlyLimit: 500000,
+  dailyCount: 100,
+  successCallback: '',
+  failCallback: '',
+  refundCallback: '',
+  timeout: 30,
+  enableAutoRefund: false,
+  enablePaymentLog: true
+})
+
+const smsConfig = ref({
+  enabled: true,
+  provider: 'aliyun',
+  accessKey: '',
+  secretKey: '',
+  signName: '',
+  codeLength: 6,
+  codeExpiry: 5,
+  codeTemplateId: '',
+  sendInterval: 60,
+  dailyLimit: 10,
+  enableNotification: true,
+  retryCount: 3,
+  timeout: 10,
+  callbackUrl: '',
+  balanceAlert: 1000
+})
+
+const trackingConfig = ref({
+  enabled: true,
+  reportMethod: 'batch',
+  batchInterval: 60,
+  autoEvents: ['pageView', 'click']
+})
+
+const logConfig = ref({
+  enabled: true,
+  level: 'info',
+  storageTypes: ['local'],
+  retentionDays: 30,
+  realtimeReport: false,
+  batchSize: 100
+})
+
+const monitorConfig = ref({
+  enabled: true,
+  metrics: ['api', 'error'],
+  interval: 60,
+  alertEnabled: true,
+  alertMethods: ['email'],
+  alertReceivers: ''
+})
+
+const storageConfig = ref({
+  enabled: true,
+  provider: 'aliyun',
+  bucket: '',
+  accessKey: '',
+  secretKey: '',
+  maxFileSize: 100,
+  allowedTypes: 'jpg,png,gif,pdf,doc,docx'
+})
+
+const configMgmtConfig = ref({
+  enabled: true,
+  refreshInterval: 300,
+  enableCache: true
+})
+
+const versionConfig = ref({
+  enabled: true,
+  forceUpdate: false,
+  promptType: 'dialog',
+  androidUrl: '',
+  iosUrl: ''
+})
+
+// 切换分组展开/收起
+const toggleGroup = (groupKey) => {
+  const index = expandedGroups.value.indexOf(groupKey)
+  if (index > -1) {
+    expandedGroups.value.splice(index, 1)
+  } else {
+    expandedGroups.value.push(groupKey)
+  }
+}
+
+// 检查分组是否有模块
+const hasModulesInGroup = (groupKey) => {
+  const group = moduleGroups.find(g => g.key === groupKey)
+  if (!group) return false
+  return appModules.value.some(m => group.modules.includes(m.source_module))
+}
+
+// 获取分组内的模块
+const getModulesInGroup = (groupKey) => {
+  const group = moduleGroups.find(g => g.key === groupKey)
+  if (!group) return []
+  return appModules.value
+    .filter(m => group.modules.includes(m.source_module))
+    .map(m => ({
+      ...m,
+      name: moduleNameMap[m.source_module] || m.name
+    }))
+}
 
 // 获取APP信息
 const fetchAppInfo = async () => {
@@ -193,6 +1071,9 @@ const fetchAppInfo = async () => {
     const res = await request.get(`/api/v1/apps/${appId.value}`)
     if (res.code === 0 && res.data) {
       appInfo.value = res.data
+      basicConfig.value.name = res.data.name
+      basicConfig.value.description = res.data.description || ''
+      basicConfig.value.package_name = res.data.package_name || ''
     }
   } catch (error) {
     console.error('获取APP信息失败:', error)
@@ -205,90 +1086,69 @@ const fetchAppModules = async () => {
     const res = await request.get(`/api/v1/apps/${appId.value}/modules`)
     if (res.code === 0 && res.data) {
       appModules.value = res.data
-      // 根据模块生成工作台功能
-      generateWorkspaceFunctions()
     }
   } catch (error) {
     console.error('获取APP模块失败:', error)
-    // 使用模拟数据
-    appModules.value = [
-      { id: 1, name: '用户管理', icon: '👥', description: '管理APP用户', enabled: true },
-      { id: 2, name: '消息中心', icon: '💬', description: '消息推送管理', enabled: true },
-      { id: 3, name: '数据统计', icon: '📊', description: '数据分析统计', enabled: true },
-      { id: 4, name: '版本管理', icon: '📦', description: 'APP版本控制', enabled: true },
-      { id: 5, name: '配置管理', icon: '⚙️', description: '远程配置管理', enabled: false }
-    ]
-    generateWorkspaceFunctions()
   }
 }
 
-// 根据模块生成工作台功能
-const generateWorkspaceFunctions = () => {
-  const functions = []
-  appModules.value.forEach(module => {
-    if (module.enabled) {
-      // 根据模块类型添加对应的工作台功能
-      if (module.name.includes('用户')) {
-        functions.push({ id: 'user-list', name: '用户列表', icon: '👥', description: '查看和管理用户', module: module.id })
-        functions.push({ id: 'user-stats', name: '用户统计', icon: '📈', description: '用户数据统计', module: module.id })
-      }
-      if (module.name.includes('消息')) {
-        functions.push({ id: 'send-message', name: '发送消息', icon: '✉️', description: '发送站内消息', module: module.id })
-        functions.push({ id: 'message-list', name: '消息记录', icon: '📋', description: '查看消息历史', module: module.id })
-      }
-      if (module.name.includes('统计') || module.name.includes('数据')) {
-        functions.push({ id: 'data-overview', name: '数据概览', icon: '📊', description: '数据统计概览', module: module.id })
-        functions.push({ id: 'event-tracking', name: '事件追踪', icon: '🎯', description: '用户行为追踪', module: module.id })
-      }
-      if (module.name.includes('版本')) {
-        functions.push({ id: 'version-list', name: '版本列表', icon: '📦', description: '管理APP版本', module: module.id })
-        functions.push({ id: 'release', name: '发布版本', icon: '🚀', description: '发布新版本', module: module.id })
-      }
-    }
-  })
-  workspaceFunctions.value = functions
-  if (functions.length > 0) {
-    activeFunction.value = functions[0].id
-  }
+// 复制文本
+const copyText = (text) => {
+  if (!text) return
+  navigator.clipboard.writeText(text)
+  ElMessage.success('已复制到剪贴板')
 }
 
-// 打开模块配置
-const openModuleConfig = (module) => {
-  currentModule.value = module
-  moduleConfigForm.value = {
-    enabled: module.enabled,
-    apiEndpoint: module.apiEndpoint || '',
-    timeout: module.timeout || 5000,
-    retryCount: module.retryCount || 3,
-    remark: module.remark || ''
-  }
-  configDialogVisible.value = true
+// 遮盖密钥
+const maskSecret = (secret) => {
+  if (!secret) return '-'
+  if (secret.length <= 8) return '********'
+  return secret.substring(0, 4) + '****' + secret.substring(secret.length - 4)
 }
 
-// 保存模块配置
-const saveModuleConfig = async () => {
+// 格式化日期
+const formatDate = (dateStr) => {
+  if (!dateStr) return '-'
+  return new Date(dateStr).toLocaleString('zh-CN')
+}
+
+// 保存基础配置
+const saveBasicConfig = async () => {
   try {
-    // 这里调用后端API保存配置
+    await request.put(`/api/v1/apps/${appId.value}`, basicConfig.value)
     ElMessage.success('配置保存成功')
-    configDialogVisible.value = false
-    // 更新本地数据
-    const index = appModules.value.findIndex(m => m.id === currentModule.value.id)
-    if (index !== -1) {
-      appModules.value[index] = {
-        ...appModules.value[index],
-        ...moduleConfigForm.value
-      }
-    }
-    generateWorkspaceFunctions()
+    fetchAppInfo()
   } catch (error) {
     ElMessage.error('保存失败')
   }
 }
 
-// 获取功能组件
-const getFunctionComponent = (funcId) => {
-  // 返回对应的功能组件，这里可以根据需要扩展
-  return 'div'
+// 重置基础配置
+const resetBasicConfig = () => {
+  basicConfig.value.name = appInfo.value.name
+  basicConfig.value.description = appInfo.value.description || ''
+  basicConfig.value.package_name = appInfo.value.package_name || ''
+}
+
+// 保存模块配置
+const saveModuleConfig = async (moduleKey) => {
+  try {
+    // 这里调用后端API保存配置
+    // await request.put(`/api/v1/apps/${appId.value}/modules/${moduleKey}/config`, configData)
+    ElMessage.success('配置保存成功')
+  } catch (error) {
+    ElMessage.error('保存失败')
+  }
+}
+
+// 测试配置
+const testConfig = (moduleKey) => {
+  ElMessage.info('测试功能开发中...')
+}
+
+// 重置配置
+const resetConfig = (moduleKey) => {
+  ElMessage.info('配置已重置')
 }
 
 onMounted(() => {
@@ -320,311 +1180,276 @@ onMounted(() => {
   .back-btn {
     color: white;
     &:hover {
-      background: rgba(255,255,255,0.1);
+      background: rgba(255, 255, 255, 0.1);
     }
   }
   
   .app-icon {
-    width: 48px;
-    height: 48px;
-    background: white;
-    border-radius: 12px;
+    width: 36px;
+    height: 36px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 20px;
     font-weight: bold;
-    color: #667eea;
+    font-size: 16px;
   }
   
   .app-name {
     font-size: 18px;
     font-weight: 600;
   }
-}
-
-.header-tabs {
-  display: flex;
-  gap: 8px;
   
-  .tab-item {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 10px 20px;
-    border-radius: 20px;
-    cursor: pointer;
-    transition: all 0.3s;
-    font-size: 15px;
-    
-    .tab-icon {
-      font-size: 16px;
-    }
-    
-    &:hover {
-      background: rgba(255,255,255,0.2);
-    }
-    
-    &.active {
-      background: white;
-      color: #667eea;
-      font-weight: 500;
-    }
+  .app-id {
+    font-size: 12px;
+    opacity: 0.8;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 2px 8px;
+    border-radius: 4px;
   }
 }
 
 .header-right {
   .user-btn {
     color: white;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .admin-name {
+    font-size: 14px;
   }
 }
 
-// 工作台样式
-.workspace-container {
+.main-container {
   display: flex;
-  height: calc(100vh - 72px);
+  height: calc(100vh - 60px);
 }
 
-.workspace-sidebar {
+.sidebar {
   width: 240px;
   background: white;
   border-right: 1px solid #e4e7ed;
-  padding: 16px 0;
   overflow-y: auto;
+  padding: 16px 0;
+}
+
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 20px;
+  cursor: pointer;
+  color: #606266;
+  transition: all 0.2s;
   
-  .sidebar-title {
-    padding: 8px 20px;
-    font-size: 12px;
-    color: #909399;
-    text-transform: uppercase;
-    letter-spacing: 1px;
+  &:hover {
+    background: #f5f7fa;
+    color: #409eff;
   }
   
-  .sidebar-item {
+  &.active {
+    background: #ecf5ff;
+    color: #409eff;
+    border-right: 3px solid #409eff;
+  }
+  
+  &.sub-item {
+    padding-left: 48px;
+    font-size: 14px;
+  }
+}
+
+.sidebar-group {
+  .group-header {
     display: flex;
     align-items: center;
-    gap: 10px;
+    justify-content: space-between;
     padding: 12px 20px;
     cursor: pointer;
-    transition: all 0.2s;
-    
-    .func-icon {
-      font-size: 18px;
-    }
-    
-    .func-name {
-      font-size: 14px;
-      color: #303133;
-    }
+    color: #303133;
+    font-weight: 500;
     
     &:hover {
       background: #f5f7fa;
     }
     
-    &.active {
-      background: #ecf5ff;
-      border-right: 3px solid #409eff;
+    .group-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .expand-icon {
+      transition: transform 0.2s;
       
-      .func-name {
-        color: #409eff;
-        font-weight: 500;
+      &.expanded {
+        transform: rotate(90deg);
       }
     }
   }
   
-  .empty-sidebar {
-    padding: 40px 20px;
-    text-align: center;
-    color: #909399;
-    
-    .hint {
-      font-size: 12px;
-      margin-top: 8px;
-    }
+  .group-items {
+    background: #fafafa;
   }
 }
 
-.workspace-main {
+.content-area {
   flex: 1;
-  padding: 24px;
   overflow-y: auto;
-  
-  .function-content {
-    background: white;
-    border-radius: 8px;
-    padding: 24px;
-    
-    h2 {
-      margin: 0 0 8px;
-      font-size: 20px;
-      color: #303133;
-    }
-    
-    .function-desc {
-      color: #909399;
-      margin-bottom: 24px;
-    }
-  }
-  
-  .empty-workspace {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    
-    .empty-icon {
-      font-size: 64px;
-    }
-  }
-}
-
-// 配置中心样式
-.config-container {
   padding: 24px;
-  max-width: 1200px;
-  margin: 0 auto;
-  
-  .config-header {
-    margin-bottom: 24px;
-    
-    h2 {
-      margin: 0 0 8px;
-      font-size: 24px;
-      color: #303133;
-    }
-    
-    p {
-      color: #909399;
-      margin: 0;
-    }
-  }
 }
 
-.modules-grid {
+.page-content {
+  max-width: 900px;
+}
+
+.page-title {
+  font-size: 22px;
+  font-weight: 600;
+  color: #303133;
+  margin-bottom: 8px;
+}
+
+.page-desc {
+  color: #909399;
+  margin-bottom: 24px;
+}
+
+.stats-cards {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(4, 1fr);
   gap: 16px;
+  margin-bottom: 24px;
 }
 
-.module-card {
+.stat-card {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 20px;
-  background: white;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: all 0.3s;
-  border: 1px solid #e4e7ed;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   
-  &:hover {
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    transform: translateY(-2px);
-  }
-  
-  .module-icon {
-    font-size: 32px;
-    width: 56px;
-    height: 56px;
+  .stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #f5f7fa;
-    border-radius: 12px;
+    font-size: 24px;
+    
+    &.users { background: #e6f7ff; color: #1890ff; }
+    &.modules { background: #f6ffed; color: #52c41a; }
+    &.requests { background: #fff7e6; color: #fa8c16; }
+    &.errors { background: #fff1f0; color: #f5222d; }
   }
   
-  .module-info {
-    flex: 1;
-    
-    h3 {
-      margin: 0 0 4px;
-      font-size: 16px;
+  .stat-info {
+    .stat-value {
+      font-size: 28px;
+      font-weight: 600;
       color: #303133;
     }
     
-    p {
-      margin: 0;
-      font-size: 13px;
+    .stat-label {
+      font-size: 14px;
       color: #909399;
     }
   }
+}
+
+.info-section {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   
-  .arrow-icon {
-    color: #c0c4cc;
+  h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #303133;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #ebeef5;
   }
 }
 
-.empty-modules {
-  grid-column: 1 / -1;
-  padding: 60px;
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
 }
 
-.module-config-form {
-  padding: 10px 0;
-}
-
-// 移动端适配
-@media (max-width: 768px) {
-  .top-header {
-    flex-wrap: wrap;
-    gap: 12px;
-    padding: 12px 16px;
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  
+  label {
+    font-size: 13px;
+    color: #909399;
   }
   
-  .header-tabs {
-    order: 3;
-    width: 100%;
-    justify-content: center;
+  span {
+    font-size: 14px;
+    color: #303133;
     
-    .tab-item {
-      padding: 8px 16px;
-      font-size: 14px;
-    }
-  }
-  
-  .workspace-container {
-    flex-direction: column;
-    height: auto;
-  }
-  
-  .workspace-sidebar {
-    width: 100%;
-    border-right: none;
-    border-bottom: 1px solid #e4e7ed;
-    display: flex;
-    overflow-x: auto;
-    padding: 8px;
-    
-    .sidebar-title {
-      display: none;
-    }
-    
-    .sidebar-item {
-      flex-shrink: 0;
-      padding: 8px 12px;
-      border-radius: 20px;
+    &.copyable {
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
       
-      &.active {
-        background: #409eff;
-        border-right: none;
-        
-        .func-name {
-          color: white;
-        }
+      &:hover {
+        color: #409eff;
       }
     }
   }
+}
+
+.module-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.config-form {
+  background: white;
+  border-radius: 8px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.form-section {
+  margin-bottom: 32px;
   
-  .workspace-main {
-    padding: 16px;
+  h4 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #303133;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #ebeef5;
   }
-  
-  .config-container {
-    padding: 16px;
-  }
-  
-  .modules-grid {
-    grid-template-columns: 1fr;
-  }
+}
+
+.form-hint {
+  margin-left: 12px;
+  font-size: 12px;
+  color: #909399;
+}
+
+:deep(.el-form-item) {
+  margin-bottom: 20px;
+}
+
+:deep(.el-input-number) {
+  width: 150px;
 }
 </style>

@@ -8,8 +8,8 @@ const getBaseURL = () => {
     return '/api/v1'
   }
   // 生产环境或通过公网访问时，使用绝对路径
-  // 将前端域名中的5173替换为8080
-  const apiHost = window.location.origin.replace('5173', '8080')
+  // 将前端域名中的5173或5174替换为8080
+  const apiHost = window.location.origin.replace(/517[34]/, '8080')
   return `${apiHost}/api/v1`
 }
 

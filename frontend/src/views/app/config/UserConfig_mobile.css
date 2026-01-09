@@ -1,0 +1,91 @@
+/* 移动端适配 - UserConfig */
+@media (max-width: 768px) {
+  .module-config-container {
+    padding: 12px;
+  }
+
+  .module-config-container .config-header h2 {
+    font-size: 18px;
+  }
+
+  .module-config-container .config-header .config-description {
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  .module-config-container .el-card__body {
+    padding: 12px !important;
+  }
+
+  .module-config-container .el-form {
+    width: 100% !important;
+  }
+
+  .module-config-container .el-form-item {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    margin-bottom: 16px;
+  }
+
+  .module-config-container .el-form-item__label {
+    width: 100% !important;
+    text-align: left !important;
+    margin-bottom: 8px;
+    padding-right: 0 !important;
+    justify-content: flex-start !important;
+  }
+
+  .module-config-container .el-form-item__content {
+    width: 100% !important;
+    margin-left: 0 !important;
+    flex-wrap: wrap;
+    flex-direction: column;
+    align-items: flex-start !important;
+  }
+
+  .module-config-container .el-switch {
+    margin-bottom: 4px;
+  }
+
+  .module-config-container .el-checkbox-group {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .module-config-container .el-checkbox-group .el-checkbox {
+    display: flex;
+    margin-bottom: 10px;
+    margin-right: 0;
+    width: 100%;
+  }
+
+  .module-config-container .form-tip {
+    display: block;
+    width: 100%;
+    margin-top: 8px;
+    margin-left: 0;
+    font-size: 12px;
+    line-height: 1.5;
+    color: #909399;
+    word-break: break-word;
+    white-space: normal;
+  }
+
+  .module-config-container .el-input,
+  .module-config-container .el-select {
+    width: 100% !important;
+  }
+
+  .module-config-container .el-input-number {
+    width: 100% !important;
+  }
+
+  .module-config-container .el-divider {
+    margin: 20px 0 16px 0;
+  }
+
+  .module-config-container .el-divider__text {
+    font-size: 14px;
+  }
+}

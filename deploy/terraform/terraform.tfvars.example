@@ -1,0 +1,28 @@
+# Terraform变量示例文件
+# 复制此文件为 terraform.tfvars 并填写实际值
+
+# 阿里云认证（必填）
+access_key = "your-access-key-id"
+secret_key = "your-access-key-secret"
+region     = "cn-hangzhou"
+
+# 项目配置
+project_name = "app-platform"
+environment  = "production"
+
+# Kubernetes配置
+k8s_version        = "1.28.3-aliyun.1"
+node_instance_type = "ecs.c6.xlarge"  # 4核8G
+node_min_size      = 2
+node_max_size      = 10
+node_desired_size  = 2
+
+# RDS配置
+rds_instance_type = "mysql.n4.medium.1"  # 2核4G
+rds_storage       = 50
+db_name           = "app_platform"
+db_user           = "app_platform"
+db_password       = "YourSecurePassword123!"  # 至少8位，包含大小写和数字
+
+# 应用配置
+jwt_secret = "your-random-32-character-string"

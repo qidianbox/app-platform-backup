@@ -1,0 +1,130 @@
+{
+  "query": "SELECT id, module_code, module_name, source_module FROM module_templates LIMIT 20;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3HmF555sZ6wXsVo.885fbf394348 --database cSZcQBnZuHpLU79S85jppV --execute SELECT id, module_code, module_name, source_module FROM module_templates LIMIT 20;",
+  "rows": [
+    {
+      "id": "1",
+      "module_code": "user_management",
+      "module_name": "用户管理",
+      "source_module": "NULL"
+    },
+    {
+      "id": "2",
+      "module_code": "message_center",
+      "module_name": "消息中心",
+      "source_module": "NULL"
+    },
+    {
+      "id": "3",
+      "module_code": "push_service",
+      "module_name": "推送服务",
+      "source_module": "NULL"
+    },
+    {
+      "id": "4",
+      "module_code": "data_tracking",
+      "module_name": "数据埋点",
+      "source_module": "NULL"
+    },
+    {
+      "id": "5",
+      "module_code": "log_service",
+      "module_name": "日志服务",
+      "source_module": "NULL"
+    },
+    {
+      "id": "6",
+      "module_code": "monitor_alert",
+      "module_name": "监控告警",
+      "source_module": "NULL"
+    },
+    {
+      "id": "7",
+      "module_code": "file_storage",
+      "module_name": "文件存储",
+      "source_module": "NULL"
+    },
+    {
+      "id": "8",
+      "module_code": "config_management",
+      "module_name": "配置管理",
+      "source_module": "NULL"
+    },
+    {
+      "id": "9",
+      "module_code": "version_management",
+      "module_name": "版本管理",
+      "source_module": "NULL"
+    },
+    {
+      "id": "10",
+      "module_code": "config_list",
+      "module_name": "配置列表",
+      "source_module": "config_management"
+    },
+    {
+      "id": "11",
+      "module_code": "config_create",
+      "module_name": "创建配置",
+      "source_module": "config_management"
+    },
+    {
+      "id": "12",
+      "module_code": "config_update",
+      "module_name": "更新配置",
+      "source_module": "config_management"
+    },
+    {
+      "id": "13",
+      "module_code": "config_publish",
+      "module_name": "发布配置",
+      "source_module": "config_management"
+    },
+    {
+      "id": "14",
+      "module_code": "config_history",
+      "module_name": "配置历史",
+      "source_module": "config_management"
+    },
+    {
+      "id": "15",
+      "module_code": "event_report",
+      "module_name": "事件上报",
+      "source_module": "event_tracking"
+    },
+    {
+      "id": "16",
+      "module_code": "event_batch_report",
+      "module_name": "批量上报",
+      "source_module": "event_tracking"
+    },
+    {
+      "id": "17",
+      "module_code": "event_list",
+      "module_name": "事件列表",
+      "source_module": "event_tracking"
+    },
+    {
+      "id": "18",
+      "module_code": "event_stats",
+      "module_name": "事件统计",
+      "source_module": "event_tracking"
+    },
+    {
+      "id": "19",
+      "module_code": "event_funnel",
+      "module_name": "漏斗分析",
+      "source_module": "event_tracking"
+    },
+    {
+      "id": "20",
+      "module_code": "event_definition",
+      "module_name": "事件定义",
+      "source_module": "event_tracking"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tmodule_code\tmodule_name\tsource_module\n1\tuser_management\t用户管理\tNULL\n2\tmessage_center\t消息中心\tNULL\n3\tpush_service\t推送服务\tNULL\n4\tdata_tracking\t数据埋点\tNULL\n5\tlog_service\t日志服务\tNULL\n6\tmonitor_alert\t监控告警\tNULL\n7\tfile_storage\t文件存储\tNULL\n8\tconfig_management\t配置管理\tNULL\n9\tversion_management\t版本管理\tNULL\n10\tconfig_list\t配置列表\tconfig_management\n11\tconfig_create\t创建配置\tconfig_management\n12\tconfig_update\t更新配置\tconfig_management\n13\tconfig_publish\t发布配置\tconfig_management\n14\tconfig_history\t配置历史\tconfig_management\n15\tevent_report\t事件上报\tevent_tracking\n16\tevent_batch_report\t批量上报\tevent_tracking\n17\tevent_list\t事件列表\tevent_tracking\n18\tevent_stats\t事件统计\tevent_tracking\n19\tevent_funnel\t漏斗分析\tevent_tracking\n20\tevent_definition\t事件定义\tevent_tracking\n",
+  "stderr": "",
+  "execution_time_ms": 1503
+}

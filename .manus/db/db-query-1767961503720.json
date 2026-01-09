@@ -1,0 +1,59 @@
+{
+  "query": "SELECT am.id, am.app_id, am.module_code as am_code, mt.module_code as mt_code, mt.module_name\nFROM app_modules am\nLEFT JOIN module_templates mt ON am.module_code = mt.module_code\nWHERE am.app_id = 1;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3HmF555sZ6wXsVo.885fbf394348 --database cSZcQBnZuHpLU79S85jppV --execute SELECT am.id, am.app_id, am.module_code as am_code, mt.module_code as mt_code, mt.module_name\nFROM app_modules am\nLEFT JOIN module_templates mt ON am.module_code = mt.module_code\nWHERE am.app_id = 1;",
+  "rows": [
+    {
+      "id": "1",
+      "app_id": "1",
+      "am_code": "user_management",
+      "mt_code": "user_management",
+      "module_name": "用户管理"
+    },
+    {
+      "id": "2",
+      "app_id": "1",
+      "am_code": "message_center",
+      "mt_code": "message_center",
+      "module_name": "消息中心"
+    },
+    {
+      "id": "30001",
+      "app_id": "1",
+      "am_code": "user_management",
+      "mt_code": "user_management",
+      "module_name": "用户管理"
+    },
+    {
+      "id": "30002",
+      "app_id": "1",
+      "am_code": "message_center",
+      "mt_code": "message_center",
+      "module_name": "消息中心"
+    },
+    {
+      "id": "30003",
+      "app_id": "1",
+      "am_code": "push_service",
+      "mt_code": "push_service",
+      "module_name": "推送服务"
+    },
+    {
+      "id": "30004",
+      "app_id": "1",
+      "am_code": "data_tracking",
+      "mt_code": "data_tracking",
+      "module_name": "数据埋点"
+    },
+    {
+      "id": "30005",
+      "app_id": "1",
+      "am_code": "log_service",
+      "mt_code": "log_service",
+      "module_name": "日志服务"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tapp_id\tam_code\tmt_code\tmodule_name\n1\t1\tuser_management\tuser_management\t用户管理\n2\t1\tmessage_center\tmessage_center\t消息中心\n30001\t1\tuser_management\tuser_management\t用户管理\n30002\t1\tmessage_center\tmessage_center\t消息中心\n30003\t1\tpush_service\tpush_service\t推送服务\n30004\t1\tdata_tracking\tdata_tracking\t数据埋点\n30005\t1\tlog_service\tlog_service\t日志服务\n",
+  "stderr": "",
+  "execution_time_ms": 1549
+}

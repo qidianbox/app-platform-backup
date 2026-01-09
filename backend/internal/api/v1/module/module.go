@@ -27,27 +27,56 @@ func GetAppModules(c *gin.Context) {
 	var modules []model.AppModule
 	database.GetDB().Where("app_id = ?", appID).Find(&modules)
 
-	// 获取模块模板信息
-	type ModuleWithTemplate struct {
-		model.AppModule
+	// 获取模块信息（使用source_module匹配）
+	type ModuleInfo struct {
+		ID          uint   `json:"id"`
+		AppID       uint   `json:"app_id"`
+		ModuleCode  string `json:"module_code"`
 		ModuleName  string `json:"module_name"`
 		Category    string `json:"category"`
 		Description string `json:"description"`
 		Icon        string `json:"icon"`
+		Status      int    `json:"status"`
 	}
 
-	result := make([]ModuleWithTemplate, 0)
+	// 模块名称映射
+	moduleNameMap := map[string]struct {
+		Name        string
+		Category    string
+		Description string
+		Icon        string
+	}{
+		"user_management":    {"用户管理", "用户与权限", "用户注册、登录、权限管理", "user"},
+		"message_center":     {"消息中心", "消息与通知", "站内消息、通知管理", "message"},
+		"push_service":       {"推送服务", "消息与通知", "APP推送通知服务", "notification"},
+		"data_tracking":      {"数据埋点", "数据与分析", "用户行为埋点和数据分析", "chart"},
+		"log_service":        {"日志服务", "系统与运维", "应用日志收集和查询", "document"},
+		"monitor_alert":      {"监控告警", "系统与运维", "应用监控和告警通知", "warning"},
+		"file_storage":       {"文件存储", "存储服务", "文件上传、下载、管理", "folder"},
+		"config_management":  {"配置管理", "存储服务", "远程配置下发和管理", "setting"},
+		"version_management": {"版本管理", "存储服务", "APP版本发布和更新", "box"},
+	}
+
+	result := make([]ModuleInfo, 0)
 	for _, m := range modules {
-		var template model.ModuleTemplate
-		if err := database.GetDB().Where("module_code = ?", m.ModuleCode).First(&template).Error; err == nil {
-			result = append(result, ModuleWithTemplate{
-				AppModule:   m,
-				ModuleName:  template.ModuleName,
-				Category:    template.Category,
-				Description: template.Description,
-				Icon:        template.Icon,
-			})
+		info := ModuleInfo{
+			ID:         m.ID,
+			AppID:      m.AppID,
+			ModuleCode: m.ModuleCode,
+			Status:     m.Status,
 		}
+		if moduleInfo, ok := moduleNameMap[m.ModuleCode]; ok {
+			info.ModuleName = moduleInfo.Name
+			info.Category = moduleInfo.Category
+			info.Description = moduleInfo.Description
+			info.Icon = moduleInfo.Icon
+		} else {
+			info.ModuleName = m.ModuleCode
+			info.Category = "其他"
+			info.Description = ""
+			info.Icon = "setting"
+		}
+		result = append(result, info)
 	}
 
 	c.JSON(http.StatusOK, gin.H{

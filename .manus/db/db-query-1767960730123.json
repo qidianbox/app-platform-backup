@@ -1,0 +1,36 @@
+{
+  "query": "SELECT * FROM apps LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3HmF555sZ6wXsVo.885fbf394348 --database cSZcQBnZuHpLU79S85jppV --execute SELECT * FROM apps LIMIT 5;",
+  "rows": [
+    {
+      "id": "1",
+      "name": "Manus数据库测试APP",
+      "app_id": "app_57f64dfa7b885830",
+      "app_secret": "73eecf922ab2779826c862664868ab68",
+      "package_name": "com.manus.test",
+      "description": "测试Manus数据库",
+      "icon": "",
+      "status": "1",
+      "created_at": "2026-01-09 05:54:58",
+      "updated_at": "2026-01-09 05:54:58",
+      "deleted_at": "NULL"
+    },
+    {
+      "id": "2",
+      "name": "Manus数据库测试APP2",
+      "app_id": "app_d5bb0859fb41a2cd",
+      "app_secret": "036b7c31532afa0fc30857145e350fee",
+      "package_name": "com.manus.test2",
+      "description": "测试Manus数据库",
+      "icon": "",
+      "status": "1",
+      "created_at": "2026-01-09 05:55:05",
+      "updated_at": "2026-01-09 05:55:05",
+      "deleted_at": "NULL"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tname\tapp_id\tapp_secret\tpackage_name\tdescription\ticon\tstatus\tcreated_at\tupdated_at\tdeleted_at\n1\tManus数据库测试APP\tapp_57f64dfa7b885830\t73eecf922ab2779826c862664868ab68\tcom.manus.test\t测试Manus数据库\t\t1\t2026-01-09 05:54:58\t2026-01-09 05:54:58\tNULL\n2\tManus数据库测试APP2\tapp_d5bb0859fb41a2cd\t036b7c31532afa0fc30857145e350fee\tcom.manus.test2\t测试Manus数据库\t\t1\t2026-01-09 05:55:05\t2026-01-09 05:55:05\tNULL\n",
+  "stderr": "",
+  "execution_time_ms": 1563
+}

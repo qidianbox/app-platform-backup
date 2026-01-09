@@ -170,7 +170,7 @@
                 type="primary"
                 effect="plain"
               >
-                {{ module.name }}
+                {{ module.module_name || moduleNameMap[module.module_code] || module.name }}
               </el-tag>
               <el-empty v-if="appModules.length === 0" description="暂无启用模块" />
             </div>
@@ -1050,7 +1050,8 @@ const toggleGroup = (groupKey) => {
 const hasModulesInGroup = (groupKey) => {
   const group = moduleGroups.find(g => g.key === groupKey)
   if (!group) return false
-  return appModules.value.some(m => group.modules.includes(m.source_module))
+  // 使用module_code匹配（后端返回的字段）
+  return appModules.value.some(m => group.modules.includes(m.module_code))
 }
 
 // 获取分组内的模块
@@ -1058,17 +1059,18 @@ const getModulesInGroup = (groupKey) => {
   const group = moduleGroups.find(g => g.key === groupKey)
   if (!group) return []
   return appModules.value
-    .filter(m => group.modules.includes(m.source_module))
+    .filter(m => group.modules.includes(m.module_code))
     .map(m => ({
       ...m,
-      name: moduleNameMap[m.source_module] || m.name
+      source_module: m.module_code, // 兼容侧边栏点击
+      name: moduleNameMap[m.module_code] || m.module_name || m.name
     }))
 }
 
 // 获取APP信息
 const fetchAppInfo = async () => {
   try {
-    const res = await request.get(`/api/v1/apps/${appId.value}`)
+    const res = await request.get(`/apps/${appId.value}`)
     if (res.code === 0 && res.data) {
       appInfo.value = res.data
       basicConfig.value.name = res.data.name
@@ -1083,7 +1085,7 @@ const fetchAppInfo = async () => {
 // 获取APP模块列表
 const fetchAppModules = async () => {
   try {
-    const res = await request.get(`/api/v1/apps/${appId.value}/modules`)
+    const res = await request.get(`/apps/${appId.value}/modules`)
     if (res.code === 0 && res.data) {
       appModules.value = res.data
     }
@@ -1115,7 +1117,7 @@ const formatDate = (dateStr) => {
 // 保存基础配置
 const saveBasicConfig = async () => {
   try {
-    await request.put(`/api/v1/apps/${appId.value}`, basicConfig.value)
+    await request.put(`/apps/${appId.value}`, basicConfig.value)
     ElMessage.success('配置保存成功')
     fetchAppInfo()
   } catch (error) {

@@ -1,0 +1,66 @@
+{
+  "query": "SELECT id, app_id, module_id, source_module, module_code, status FROM app_modules WHERE app_id = 1;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3HmF555sZ6wXsVo.885fbf394348 --database cSZcQBnZuHpLU79S85jppV --execute SELECT id, app_id, module_id, source_module, module_code, status FROM app_modules WHERE app_id = 1;",
+  "rows": [
+    {
+      "id": "1",
+      "app_id": "1",
+      "module_id": "0",
+      "source_module": "user_management",
+      "module_code": "user_management",
+      "status": "1"
+    },
+    {
+      "id": "2",
+      "app_id": "1",
+      "module_id": "0",
+      "source_module": "message_center",
+      "module_code": "message_center",
+      "status": "1"
+    },
+    {
+      "id": "30001",
+      "app_id": "1",
+      "module_id": "0",
+      "source_module": "user_management",
+      "module_code": "user_management",
+      "status": "1"
+    },
+    {
+      "id": "30002",
+      "app_id": "1",
+      "module_id": "0",
+      "source_module": "message_center",
+      "module_code": "message_center",
+      "status": "1"
+    },
+    {
+      "id": "30003",
+      "app_id": "1",
+      "module_id": "0",
+      "source_module": "push_service",
+      "module_code": "push_service",
+      "status": "1"
+    },
+    {
+      "id": "30004",
+      "app_id": "1",
+      "module_id": "0",
+      "source_module": "data_tracking",
+      "module_code": "data_tracking",
+      "status": "1"
+    },
+    {
+      "id": "30005",
+      "app_id": "1",
+      "module_id": "0",
+      "source_module": "log_service",
+      "module_code": "log_service",
+      "status": "1"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tapp_id\tmodule_id\tsource_module\tmodule_code\tstatus\n1\t1\t0\tuser_management\tuser_management\t1\n2\t1\t0\tmessage_center\tmessage_center\t1\n30001\t1\t0\tuser_management\tuser_management\t1\n30002\t1\t0\tmessage_center\tmessage_center\t1\n30003\t1\t0\tpush_service\tpush_service\t1\n30004\t1\t0\tdata_tracking\tdata_tracking\t1\n30005\t1\t0\tlog_service\tlog_service\t1\n",
+  "stderr": "",
+  "execution_time_ms": 1601
+}

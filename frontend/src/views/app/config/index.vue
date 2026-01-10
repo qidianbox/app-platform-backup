@@ -2,31 +2,36 @@
   <div class="app-detail">
     <!-- 顶部导航栏 -->
     <div class="top-header">
-      <!-- 左侧：Logo + APP信息 -->
-      <div class="header-logo">
-        <div class="app-icon">
-          <span>拓</span>
+      <!-- 左侧：Logo + APP信息 + 工作台/配置中心 Tab -->
+      <div class="header-left">
+        <div class="header-logo">
+          <div class="app-icon">
+            <span>拓</span>
+          </div>
+          <span class="app-name">拓客APP中台</span>
         </div>
-        <span class="app-name">拓客APP中台</span>
+        
+        <!-- 工作台 | 配置中心 Tab -->
+        <div class="header-nav">
+          <div 
+            class="nav-item" 
+            :class="{ active: activeTab === 'workspace' }"
+            @click="activeTab = 'workspace'"
+          >
+            工作台
+          </div>
+          <div 
+            class="nav-item" 
+            :class="{ active: activeTab === 'config' }"
+            @click="activeTab = 'config'"
+          >
+            配置中心
+          </div>
+        </div>
       </div>
       
-      <!-- 右侧：工作台 | 配置中心 Tab -->
-      <div class="header-nav">
-        <div 
-          class="nav-item" 
-          :class="{ active: activeTab === 'workspace' }"
-          @click="activeTab = 'workspace'"
-        >
-          工作台
-        </div>
-        <div 
-          class="nav-item" 
-          :class="{ active: activeTab === 'config' }"
-          @click="activeTab = 'config'"
-        >
-          配置中心
-        </div>
-      </div>
+      <!-- 右侧空白区域 -->
+      <div class="header-right"></div>
     </div>
 
     <div class="main-container">
@@ -1396,11 +1401,22 @@ onMounted(() => {
 .top-header {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   padding: 0 24px;
   height: 60px;
   background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
   color: white;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.header-right {
+  flex: 1;
 }
 
 .header-logo {
@@ -1427,23 +1443,9 @@ onMounted(() => {
     font-size: 16px;
   }
   
-  .app-info {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-  
   .app-name {
     font-size: 18px;
     font-weight: 600;
-  }
-  
-  .app-id {
-    font-size: 12px;
-    opacity: 0.8;
-    background: rgba(255, 255, 255, 0.1);
-    padding: 2px 8px;
-    border-radius: 4px;
   }
 }
 
@@ -1451,7 +1453,6 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 4px;
-  margin-left: auto;
   
   .nav-item {
     padding: 8px 20px;

@@ -37,8 +37,8 @@
     </div>
 
     <div class="main-container">
-      <!-- 左侧边栏 -->
-      <div class="sidebar">
+      <!-- 左侧边栏 - 仅在配置中心模式显示 -->
+      <div class="sidebar" v-show="activeTab === 'config'">
         <!-- 概览 -->
         <div 
           class="sidebar-item"
@@ -96,16 +96,7 @@
       <div class="content-area">
         <!-- 工作台模式 -->
         <template v-if="activeTab === 'workspace'">
-          <div class="workspace-content">
-            <h2 class="page-title">工作台</h2>
-            <el-alert 
-              title="功能开发中" 
-              type="info" 
-              description="工作台功能正在开发中，敬请期待！这里将显示用户管理、消息推送、日志查询等实际操作功能。" 
-              :closable="false" 
-              show-icon
-            />
-          </div>
+          <Workspace :app-id="appId" :app-info="appInfo" />
         </template>
 
         <!-- 配置中心模式 -->
@@ -924,6 +915,7 @@ import {
 } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import request from '@/utils/request'
+import Workspace from './Workspace.vue'
 
 const route = useRoute()
 const appId = computed(() => route.params.id)
@@ -1384,9 +1376,11 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 24px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 0 24px;
+  height: 60px;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
   color: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .header-left {

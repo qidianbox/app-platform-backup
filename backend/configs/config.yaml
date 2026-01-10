@@ -65,6 +65,8 @@ cors:
     - "https://5173-in0e3kpbnuhysw8mp04eq-d21edce7.sg1.manus.computer"
     - "https://5174-in0e3kpbnuhysw8mp04eq-d21edce7.sg1.manus.computer"
     - "https://8080-in0e3kpbnuhysw8mp04eq-d21edce7.sg1.manus.computer"
+    - "https://8080-isyie73syczl4a4e7ukp5-5505e7a2.us2.manus.computer"
+    - "https://5173-isyie73syczl4a4e7ukp5-5505e7a2.us2.manus.computer"
   allow_methods:
     - GET
     - POST

@@ -1,0 +1,56 @@
+APP中台系统压测摘要
+测试时间: Sat Jan 10 12:40:32 EST 2026
+========================================
+
+  Slowest:	1.3114 secs
+  Fastest:	0.0798 secs
+  Average:	0.5890 secs
+  Requests/sec:	78.7142
+  Slowest:	0.3871 secs
+  Fastest:	0.0225 secs
+  Average:	0.1263 secs
+  Requests/sec:	361.7694
+  Slowest:	0.2292 secs
+  Fastest:	0.0083 secs
+  Average:	0.0725 secs
+  Requests/sec:	595.3876
+  Slowest:	0.0099 secs
+  Fastest:	0.0001 secs
+  Average:	0.0019 secs
+  Requests/sec:	20557.6121
+  Slowest:	0.0079 secs
+  Fastest:	0.0001 secs
+  Average:	0.0018 secs
+  Requests/sec:	23533.9668
+  Slowest:	0.2404 secs
+  Fastest:	0.0149 secs
+  Average:	0.0800 secs
+  Requests/sec:	543.3951
+  Slowest:	0.3509 secs
+  Fastest:	0.0242 secs
+  Average:	0.1203 secs
+  Requests/sec:	365.4330
+  Slowest:	0.2415 secs
+  Fastest:	0.0155 secs
+  Average:	0.0778 secs
+  Requests/sec:	574.6080
+  Slowest:	0.1869 secs
+  Fastest:	0.0030 secs
+  Average:	0.0359 secs
+  Requests/sec:	1110.0823
+  Slowest:	0.1829 secs
+  Fastest:	0.0030 secs
+  Average:	0.0334 secs
+  Requests/sec:	1101.3359
+  Slowest:	0.2452 secs
+  Fastest:	0.0149 secs
+  Average:	0.0845 secs
+  Requests/sec:	529.2111
+  Slowest:	0.1891 secs
+  Fastest:	0.0031 secs
+  Average:	0.0331 secs
+  Requests/sec:	1155.8984
+  Slowest:	0.0071 secs
+  Fastest:	0.0001 secs
+  Average:	0.0015 secs
+  Requests/sec:	28349.5295

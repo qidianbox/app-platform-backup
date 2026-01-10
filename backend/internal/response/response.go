@@ -57,7 +57,7 @@ func Success(c *gin.Context, data interface{}) {
 }
 
 // SuccessWithMessage 带消息的成功响应
-func SuccessWithMessage(c *gin.Context, message string, data interface{}) {
+func SuccessWithMessage(c *gin.Context, data interface{}, message string) {
 	c.JSON(http.StatusOK, Response{
 		Code:    CodeSuccess,
 		Message: message,
@@ -160,6 +160,29 @@ func ServiceUnavailable(c *gin.Context, message string) {
 		message = codeMessages[CodeServiceUnavailable]
 	}
 	Error(c, CodeServiceUnavailable, message)
+}
+
+// ParamError 参数错误
+func ParamError(c *gin.Context, message string) {
+	if message == "" {
+		message = "参数错误"
+	}
+	BadRequest(c, message)
+}
+
+// DBError 数据库错误
+func DBError(c *gin.Context, err error) {
+	message := "数据库操作失败"
+	if err != nil {
+		// 生产环境不应该暴露详细错误信息
+		// message = err.Error()
+	}
+	InternalError(c, message)
+}
+
+// PageSuccess 分页成功响应
+func PageSuccess(c *gin.Context, list interface{}, total int64, page, size int) {
+	SuccessPage(c, list, total, page, size)
 }
 
 // getHTTPStatus 根据业务码获取HTTP状态码

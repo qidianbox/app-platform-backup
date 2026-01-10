@@ -1,0 +1,689 @@
+APP中台系统压力测试报告
+测试时间: Sat Jan 10 12:40:17 EST 2026
+========================================
+
+### 登录接口 ###
+
+Summary:
+  Total:	6.3521 secs
+  Slowest:	1.3114 secs
+  Fastest:	0.0798 secs
+  Average:	0.5890 secs
+  Requests/sec:	78.7142
+  
+  Total data:	125500 bytes
+  Size/request:	251 bytes
+
+Response time histogram:
+  0.080 [1]	|
+  0.203 [13]	|■■■■
+  0.326 [35]	|■■■■■■■■■■
+  0.449 [91]	|■■■■■■■■■■■■■■■■■■■■■■■■■■
+  0.572 [138]	|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+  0.696 [63]	|■■■■■■■■■■■■■■■■■■
+  0.819 [65]	|■■■■■■■■■■■■■■■■■■■
+  0.942 [58]	|■■■■■■■■■■■■■■■■■
+  1.065 [28]	|■■■■■■■■
+  1.188 [6]	|■■
+  1.311 [2]	|■
+
+
+Latency distribution:
+  10% in 0.3308 secs
+  25% in 0.4354 secs
+  50% in 0.5409 secs
+  75% in 0.7589 secs
+  90% in 0.9146 secs
+  95% in 0.9757 secs
+  99% in 1.0902 secs
+
+Details (average, fastest, slowest):
+  DNS+dialup:	0.0002 secs, 0.0798 secs, 1.3114 secs
+  DNS-lookup:	0.0001 secs, 0.0000 secs, 0.0026 secs
+  req write:	0.0001 secs, 0.0000 secs, 0.0026 secs
+  resp wait:	0.5887 secs, 0.0796 secs, 1.3112 secs
+  resp read:	0.0001 secs, 0.0000 secs, 0.0032 secs
+
+Status code distribution:
+  [200]	500 responses
+
+
+
+
+----------------------------------------
+
+### APP列表 ###
+URL: http://localhost:8080/api/v1/apps
+Method: GET
+
+
+Summary:
+  Total:	1.3821 secs
+  Slowest:	0.3871 secs
+  Fastest:	0.0225 secs
+  Average:	0.1263 secs
+  Requests/sec:	361.7694
+  
+  Total data:	358500 bytes
+  Size/request:	717 bytes
+
+Response time histogram:
+  0.022 [1]	|
+  0.059 [29]	|■■■■■■■
+  0.095 [160]	|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+  0.132 [102]	|■■■■■■■■■■■■■■■■■■■■■■■■■■
+  0.168 [113]	|■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+  0.205 [43]	|■■■■■■■■■■■
+  0.241 [28]	|■■■■■■■
+  0.278 [15]	|■■■■
+  0.314 [6]	|■■
+  0.351 [1]	|
+  0.387 [2]	|■
+
+
+Latency distribution:
+  10% in 0.0656 secs
+  25% in 0.0791 secs
+  50% in 0.1196 secs
+  75% in 0.1573 secs
+  90% in 0.2084 secs
+  95% in 0.2410 secs
+  99% in 0.2852 secs
+
+Details (average, fastest, slowest):
+  DNS+dialup:	0.0001 secs, 0.0225 secs, 0.3871 secs
+  DNS-lookup:	0.0001 secs, 0.0000 secs, 0.0014 secs
+  req write:	0.0001 secs, 0.0000 secs, 0.0013 secs
+  resp wait:	0.1261 secs, 0.0223 secs, 0.3857 secs
+  resp read:	0.0001 secs, 0.0000 secs, 0.0009 secs
+
+Status code distribution:
+  [200]	500 responses
+
+
+
+
+----------------------------------------
+
+### 用户列表 ###
+URL: http://localhost:8080/api/v1/users?page=1&size=20
+Method: GET
+
+
+Summary:
+  Total:	0.8398 secs
+  Slowest:	0.2292 secs
+  Fastest:	0.0083 secs
+  Average:	0.0725 secs
+  Requests/sec:	595.3876
+  
+  Total data:	121000 bytes
+  Size/request:	242 bytes
+
+Response time histogram:
+  0.008 [1]	|
+  0.030 [99]	|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+  0.053 [126]	|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+  0.075 [46]	|■■■■■■■■■■■■■■■
+  0.097 [73]	|■■■■■■■■■■■■■■■■■■■■■■■
+  0.119 [87]	|■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+  0.141 [38]	|■■■■■■■■■■■■
+  0.163 [6]	|■■
+  0.185 [9]	|■■■
+  0.207 [6]	|■■
+  0.229 [9]	|■■■
+
+
+Latency distribution:
+  10% in 0.0211 secs
+  25% in 0.0346 secs
+  50% in 0.0660 secs
+  75% in 0.1049 secs
+  90% in 0.1248 secs
+  95% in 0.1601 secs
+  99% in 0.2146 secs
+
+Details (average, fastest, slowest):
+  DNS+dialup:	0.0001 secs, 0.0083 secs, 0.2292 secs
+  DNS-lookup:	0.0001 secs, 0.0000 secs, 0.0024 secs
+  req write:	0.0000 secs, 0.0000 secs, 0.0013 secs
+  resp wait:	0.0723 secs, 0.0083 secs, 0.2264 secs
+  resp read:	0.0001 secs, 0.0000 secs, 0.0009 secs
+
+Status code distribution:
+  [200]	500 responses
+
+
+
+
+----------------------------------------
+
+### 消息列表 ###
+URL: http://localhost:8080/api/v1/messages?page=1&size=20
+Method: GET
+
+
+Summary:
+  Total:	0.0243 secs
+  Slowest:	0.0099 secs
+  Fastest:	0.0001 secs
+  Average:	0.0019 secs
+  Requests/sec:	20557.6121
+  
+  Total data:	21500 bytes
+  Size/request:	43 bytes
+
+Response time histogram:
+  0.000 [1]	|
+  0.001 [210]	|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+  0.002 [112]	|■■■■■■■■■■■■■■■■■■■■■
+  0.003 [78]	|■■■■■■■■■■■■■■■
+  0.004 [41]	|■■■■■■■■
+  0.005 [23]	|■■■■
+  0.006 [12]	|■■
+  0.007 [15]	|■■■
+  0.008 [2]	|
+  0.009 [4]	|■
+  0.010 [2]	|
+
+
+Latency distribution:
+  10% in 0.0003 secs
+  25% in 0.0005 secs
+  50% in 0.0014 secs
+  75% in 0.0027 secs
+  90% in 0.0042 secs
+  95% in 0.0058 secs
+  99% in 0.0085 secs
+
+Details (average, fastest, slowest):
+  DNS+dialup:	0.0001 secs, 0.0001 secs, 0.0099 secs
+  DNS-lookup:	0.0001 secs, 0.0000 secs, 0.0026 secs
+  req write:	0.0001 secs, 0.0000 secs, 0.0024 secs
+  resp wait:	0.0014 secs, 0.0001 secs, 0.0065 secs
+  resp read:	0.0002 secs, 0.0000 secs, 0.0038 secs
+
+Status code distribution:
+  [400]	500 responses
+
+
+
+
+----------------------------------------
+
+### 日志查询 ###
+URL: http://localhost:8080/api/v1/logs?page=1&size=20
+Method: GET
+
+
+Summary:
+  Total:	0.0212 secs
+  Slowest:	0.0079 secs
+  Fastest:	0.0001 secs
+  Average:	0.0018 secs
+  Requests/sec:	23533.9668
+  
+  Total data:	21500 bytes
+  Size/request:	43 bytes
+
+Response time histogram:
+  0.000 [1]	|
+  0.001 [190]	|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+  0.002 [107]	|■■■■■■■■■■■■■■■■■■■■■■■
+  0.002 [51]	|■■■■■■■■■■■
+  0.003 [52]	|■■■■■■■■■■■
+  0.004 [57]	|■■■■■■■■■■■■
+  0.005 [13]	|■■■
+  0.006 [10]	|■■
+  0.006 [14]	|■■■
+  0.007 [2]	|
+  0.008 [3]	|■
+
+
+Latency distribution:
+  10% in 0.0003 secs
+  25% in 0.0006 secs
+  50% in 0.0013 secs
+  75% in 0.0029 secs
+  90% in 0.0038 secs
+  95% in 0.0051 secs
+  99% in 0.0064 secs
+
+Details (average, fastest, slowest):
+  DNS+dialup:	0.0001 secs, 0.0001 secs, 0.0079 secs
+  DNS-lookup:	0.0001 secs, 0.0000 secs, 0.0036 secs
+  req write:	0.0001 secs, 0.0000 secs, 0.0027 secs
+  resp wait:	0.0012 secs, 0.0001 secs, 0.0063 secs
+  resp read:	0.0002 secs, 0.0000 secs, 0.0035 secs
+
+Status code distribution:
+  [400]	500 responses
+
+
+
+
+----------------------------------------
+
+### 监控指标 ###
+URL: http://localhost:8080/api/v1/monitor/metrics?app_id=1
+Method: GET
+
+
+Summary:
+  Total:	0.9201 secs
+  Slowest:	0.2404 secs
+  Fastest:	0.0149 secs
+  Average:	0.0800 secs
+  Requests/sec:	543.3951
+  
+  Total data:	29500 bytes
+  Size/request:	59 bytes
+
+Response time histogram:
+  0.015 [1]	|
+  0.037 [93]	|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+  0.060 [118]	|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+  0.083 [75]	|■■■■■■■■■■■■■■■■■■■■■■■■■
+  0.105 [77]	|■■■■■■■■■■■■■■■■■■■■■■■■■■
+  0.128 [66]	|■■■■■■■■■■■■■■■■■■■■■■
+  0.150 [24]	|■■■■■■■■
+  0.173 [20]	|■■■■■■■
+  0.195 [25]	|■■■■■■■■
+  0.218 [0]	|
+  0.240 [1]	|
+
+
+Latency distribution:
+  10% in 0.0302 secs
+  25% in 0.0449 secs
+  50% in 0.0684 secs
+  75% in 0.1112 secs
+  90% in 0.1492 secs
+  95% in 0.1736 secs
+  99% in 0.1829 secs
+
+Details (average, fastest, slowest):
+  DNS+dialup:	0.0001 secs, 0.0149 secs, 0.2404 secs
+  DNS-lookup:	0.0001 secs, 0.0000 secs, 0.0014 secs
+  req write:	0.0000 secs, 0.0000 secs, 0.0010 secs
+  resp wait:	0.0797 secs, 0.0148 secs, 0.2393 secs
+  resp read:	0.0001 secs, 0.0000 secs, 0.0013 secs
+
+Status code distribution:
+  [200]	500 responses
+
+
+
+
+----------------------------------------
+
+### 监控统计 ###
+URL: http://localhost:8080/api/v1/monitor/stats?app_id=1
+Method: GET
+
+
+Summary:
+  Total:	1.3682 secs
+  Slowest:	0.3509 secs
+  Fastest:	0.0242 secs
+  Average:	0.1203 secs
+  Requests/sec:	365.4330
+  
+  Total data:	55500 bytes
+  Size/request:	111 bytes
+
+Response time histogram:
+  0.024 [1]	|
+  0.057 [71]	|■■■■■■■■■■■■■■■■■■■■■■■■
+  0.090 [119]	|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+  0.122 [94]	|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+  0.155 [83]	|■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+  0.188 [62]	|■■■■■■■■■■■■■■■■■■■■■
+  0.220 [38]	|■■■■■■■■■■■■■
+  0.253 [11]	|■■■■
+  0.286 [15]	|■■■■■
+  0.318 [4]	|■
+  0.351 [2]	|■
+
+
+Latency distribution:
+  10% in 0.0514 secs
+  25% in 0.0722 secs
+  50% in 0.1109 secs
+  75% in 0.1579 secs
+  90% in 0.2001 secs
+  95% in 0.2428 secs
+  99% in 0.2949 secs
+
+Details (average, fastest, slowest):
+  DNS+dialup:	0.0002 secs, 0.0242 secs, 0.3509 secs
+  DNS-lookup:	0.0001 secs, 0.0000 secs, 0.0026 secs
+  req write:	0.0000 secs, 0.0000 secs, 0.0026 secs
+  resp wait:	0.1199 secs, 0.0241 secs, 0.3492 secs
+  resp read:	0.0001 secs, 0.0000 secs, 0.0010 secs
+
+Status code distribution:
+  [200]	500 responses
+
+
+
+
+----------------------------------------
+
+### 事件列表 ###
+URL: http://localhost:8080/api/v1/events?app_id=1&page=1&size=20
+Method: GET
+
+
+Summary:
+  Total:	0.8702 secs
+  Slowest:	0.2415 secs
+  Fastest:	0.0155 secs
+  Average:	0.0778 secs
+  Requests/sec:	574.6080
+  
+  Total data:	29000 bytes
+  Size/request:	58 bytes
+
+Response time histogram:
+  0.015 [1]	|
+  0.038 [87]	|■■■■■■■■■■■■■■■■■■■■■■■■■
+  0.061 [137]	|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+  0.083 [62]	|■■■■■■■■■■■■■■■■■■
+  0.106 [84]	|■■■■■■■■■■■■■■■■■■■■■■■■■
+  0.128 [74]	|■■■■■■■■■■■■■■■■■■■■■■
+  0.151 [25]	|■■■■■■■
+  0.174 [19]	|■■■■■■
+  0.196 [6]	|■■
+  0.219 [3]	|■
+  0.241 [2]	|■
+
+
+Latency distribution:
+  10% in 0.0333 secs
+  25% in 0.0440 secs
+  50% in 0.0669 secs
+  75% in 0.1072 secs
+  90% in 0.1332 secs
+  95% in 0.1587 secs
+  99% in 0.2048 secs
+
+Details (average, fastest, slowest):
+  DNS+dialup:	0.0001 secs, 0.0155 secs, 0.2415 secs
+  DNS-lookup:	0.0001 secs, 0.0000 secs, 0.0024 secs
+  req write:	0.0000 secs, 0.0000 secs, 0.0004 secs
+  resp wait:	0.0776 secs, 0.0153 secs, 0.2412 secs
+  resp read:	0.0001 secs, 0.0000 secs, 0.0006 secs
+
+Status code distribution:
+  [200]	500 responses
+
+
+
+
+----------------------------------------
+
+### 版本列表 ###
+URL: http://localhost:8080/api/v1/versions?app_id=1
+Method: GET
+
+
+Summary:
+  Total:	0.4504 secs
+  Slowest:	0.1869 secs
+  Fastest:	0.0030 secs
+  Average:	0.0359 secs
+  Requests/sec:	1110.0823
+  
+  Total data:	30000 bytes
+  Size/request:	60 bytes
+
+Response time histogram:
+  0.003 [1]	|
+  0.021 [322]	|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+  0.040 [4]	|
+  0.058 [21]	|■■■
+  0.077 [46]	|■■■■■■
+  0.095 [30]	|■■■■
+  0.113 [53]	|■■■■■■■
+  0.132 [11]	|■
+  0.150 [5]	|■
+  0.169 [2]	|
+  0.187 [5]	|■
+
+
+Latency distribution:
+  10% in 0.0036 secs
+  25% in 0.0044 secs
+  50% in 0.0103 secs
+  75% in 0.0683 secs
+  90% in 0.1044 secs
+  95% in 0.1125 secs
+  99% in 0.1759 secs
+
+Details (average, fastest, slowest):
+  DNS+dialup:	0.0001 secs, 0.0030 secs, 0.1869 secs
+  DNS-lookup:	0.0001 secs, 0.0000 secs, 0.0020 secs
+  req write:	0.0000 secs, 0.0000 secs, 0.0012 secs
+  resp wait:	0.0356 secs, 0.0029 secs, 0.1846 secs
+  resp read:	0.0000 secs, 0.0000 secs, 0.0008 secs
+
+Status code distribution:
+  [200]	500 responses
+
+
+
+
+----------------------------------------
+
+### 推送列表 ###
+URL: http://localhost:8080/api/v1/push?app_id=1&page=1&size=20
+Method: GET
+
+
+Summary:
+  Total:	0.4540 secs
+  Slowest:	0.1829 secs
+  Fastest:	0.0030 secs
+  Average:	0.0334 secs
+  Requests/sec:	1101.3359
+  
+  Total data:	30000 bytes
+  Size/request:	60 bytes
+
+Response time histogram:
+  0.003 [1]	|
+  0.021 [325]	|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+  0.039 [7]	|■
+  0.057 [17]	|■■
+  0.075 [33]	|■■■■
+  0.093 [52]	|■■■■■■
+  0.111 [51]	|■■■■■■
+  0.129 [8]	|■
+  0.147 [3]	|
+  0.165 [1]	|
+  0.183 [2]	|
+
+
+Latency distribution:
+  10% in 0.0036 secs
+  25% in 0.0042 secs
+  50% in 0.0101 secs
+  75% in 0.0709 secs
+  90% in 0.0993 secs
+  95% in 0.1030 secs
+  99% in 0.1343 secs
+
+Details (average, fastest, slowest):
+  DNS+dialup:	0.0001 secs, 0.0030 secs, 0.1829 secs
+  DNS-lookup:	0.0001 secs, 0.0000 secs, 0.0017 secs
+  req write:	0.0001 secs, 0.0000 secs, 0.0017 secs
+  resp wait:	0.0331 secs, 0.0029 secs, 0.1807 secs
+  resp read:	0.0001 secs, 0.0000 secs, 0.0009 secs
+
+Status code distribution:
+  [200]	500 responses
+
+
+
+
+----------------------------------------
+
+### 文件列表 ###
+URL: http://localhost:8080/api/v1/files?app_id=1&page=1&size=20
+Method: GET
+
+
+Summary:
+  Total:	0.9448 secs
+  Slowest:	0.2452 secs
+  Fastest:	0.0149 secs
+  Average:	0.0845 secs
+  Requests/sec:	529.2111
+  
+  Total data:	30000 bytes
+  Size/request:	60 bytes
+
+Response time histogram:
+  0.015 [1]	|
+  0.038 [77]	|■■■■■■■■■■■■■■■■■■■■■■■■■
+  0.061 [122]	|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+  0.084 [80]	|■■■■■■■■■■■■■■■■■■■■■■■■■■
+  0.107 [62]	|■■■■■■■■■■■■■■■■■■■■
+  0.130 [80]	|■■■■■■■■■■■■■■■■■■■■■■■■■■
+  0.153 [41]	|■■■■■■■■■■■■■
+  0.176 [13]	|■■■■
+  0.199 [16]	|■■■■■
+  0.222 [5]	|■■
+  0.245 [3]	|■
+
+
+Latency distribution:
+  10% in 0.0330 secs
+  25% in 0.0483 secs
+  50% in 0.0716 secs
+  75% in 0.1178 secs
+  90% in 0.1452 secs
+  95% in 0.1743 secs
+  99% in 0.2047 secs
+
+Details (average, fastest, slowest):
+  DNS+dialup:	0.0001 secs, 0.0149 secs, 0.2452 secs
+  DNS-lookup:	0.0001 secs, 0.0000 secs, 0.0021 secs
+  req write:	0.0000 secs, 0.0000 secs, 0.0012 secs
+  resp wait:	0.0842 secs, 0.0148 secs, 0.2439 secs
+  resp read:	0.0001 secs, 0.0000 secs, 0.0003 secs
+
+Status code distribution:
+  [200]	500 responses
+
+
+
+
+----------------------------------------
+
+### 告警列表 ###
+URL: http://localhost:8080/api/v1/monitor/alerts?app_id=1
+Method: GET
+
+
+Summary:
+  Total:	0.4326 secs
+  Slowest:	0.1891 secs
+  Fastest:	0.0031 secs
+  Average:	0.0331 secs
+  Requests/sec:	1155.8984
+  
+  Total data:	30000 bytes
+  Size/request:	60 bytes
+
+Response time histogram:
+  0.003 [1]	|
+  0.022 [329]	|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+  0.040 [6]	|■
+  0.059 [20]	|■■
+  0.077 [50]	|■■■■■■
+  0.096 [33]	|■■■■
+  0.115 [52]	|■■■■■■
+  0.133 [3]	|
+  0.152 [2]	|
+  0.170 [3]	|
+  0.189 [1]	|
+
+
+Latency distribution:
+  10% in 0.0037 secs
+  25% in 0.0047 secs
+  50% in 0.0101 secs
+  75% in 0.0673 secs
+  90% in 0.1001 secs
+  95% in 0.1078 secs
+  99% in 0.1420 secs
+
+Details (average, fastest, slowest):
+  DNS+dialup:	0.0001 secs, 0.0031 secs, 0.1891 secs
+  DNS-lookup:	0.0001 secs, 0.0000 secs, 0.0016 secs
+  req write:	0.0000 secs, 0.0000 secs, 0.0008 secs
+  resp wait:	0.0329 secs, 0.0030 secs, 0.1880 secs
+  resp read:	0.0000 secs, 0.0000 secs, 0.0002 secs
+
+Status code distribution:
+  [200]	500 responses
+
+
+
+
+----------------------------------------
+
+### 审计日志 ###
+URL: http://localhost:8080/api/v1/audit?page=1&size=20
+Method: GET
+
+
+Summary:
+  Total:	0.0176 secs
+  Slowest:	0.0071 secs
+  Fastest:	0.0001 secs
+  Average:	0.0015 secs
+  Requests/sec:	28349.5295
+  
+  Total data:	9000 bytes
+  Size/request:	18 bytes
+
+Response time histogram:
+  0.000 [1]	|
+  0.001 [206]	|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+  0.001 [85]	|■■■■■■■■■■■■■■■■■
+  0.002 [75]	|■■■■■■■■■■■■■■■
+  0.003 [58]	|■■■■■■■■■■■
+  0.004 [37]	|■■■■■■■
+  0.004 [13]	|■■■
+  0.005 [13]	|■■■
+  0.006 [8]	|■■
+  0.006 [3]	|■
+  0.007 [1]	|
+
+
+Latency distribution:
+  10% in 0.0002 secs
+  25% in 0.0004 secs
+  50% in 0.0011 secs
+  75% in 0.0022 secs
+  90% in 0.0033 secs
+  95% in 0.0043 secs
+  99% in 0.0055 secs
+
+Details (average, fastest, slowest):
+  DNS+dialup:	0.0000 secs, 0.0001 secs, 0.0071 secs
+  DNS-lookup:	0.0001 secs, 0.0000 secs, 0.0020 secs
+  req write:	0.0001 secs, 0.0000 secs, 0.0020 secs
+  resp wait:	0.0011 secs, 0.0000 secs, 0.0052 secs
+  resp read:	0.0001 secs, 0.0000 secs, 0.0035 secs
+
+Status code distribution:
+  [404]	500 responses
+
+
+
+
+----------------------------------------

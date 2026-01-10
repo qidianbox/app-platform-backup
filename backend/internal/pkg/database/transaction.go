@@ -8,6 +8,9 @@ import (
 	"gorm.io/gorm"
 )
 
+// DB 是gorm.DB的别名，方便外部包使用
+type DB = gorm.DB
+
 // TransactionFunc 事务函数类型
 type TransactionFunc func(tx *gorm.DB) error
 

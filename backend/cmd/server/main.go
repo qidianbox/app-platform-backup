@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"time"
 
 	// 核心模块
 	"app-platform-backend/core/module"
@@ -48,6 +49,11 @@ func main() {
 	r.Use(middleware.CORSMiddleware(&cfg.CORS))
 	r.Use(middleware.LoggerMiddleware())
 
+	// 初始化全局限流器 (100 QPS/IP, 突发200请求)
+	middleware.InitRateLimiter(200, 100)
+	r.Use(middleware.GlobalRateLimitMiddleware())
+	log.Println("[Main] Global rate limiter initialized (200 burst, 100 QPS/IP)")
+
 	// ========================================
 	// 模块化架构：初始化和同步
 	// ========================================
@@ -71,7 +77,8 @@ func main() {
 	v1 := r.Group("/api/v1")
 	{
 		// 公开接口（无需认证）
-		v1.POST("/admin/login", admin.Login)
+		// 登录接口使用更严格的限流 (10 QPS/IP, 1分钟窗口)
+		v1.POST("/admin/login", middleware.APIRateLimitMiddleware(10, time.Minute), admin.Login)
 
 		// 需要认证的接口
 		auth := v1.Group("")

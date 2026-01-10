@@ -4,16 +4,10 @@
     <div class="top-header">
       <!-- 左侧：Logo + APP信息 -->
       <div class="header-logo">
-        <el-button class="back-btn" text @click="$router.push('/apps')">
-          <el-icon><ArrowLeft /></el-icon>
-        </el-button>
         <div class="app-icon">
           <span>拓</span>
         </div>
-        <div class="app-info">
-          <span class="app-name">拓客APP中台</span>
-          <span class="app-id">{{ appInfo.app_id || '' }}</span>
-        </div>
+        <span class="app-name">拓客APP中台</span>
       </div>
       
       <!-- 右侧：工作台 | 配置中心 Tab -->
@@ -38,21 +32,22 @@
     <div class="main-container">
       <!-- 左侧边栏 - 仅在配置中心模式显示 -->
       <div class="sidebar" v-show="activeTab === 'config'">
-        <!-- 概览 -->
-        <div 
-          class="sidebar-item"
-          :class="{ active: currentPage === 'overview' }"
-          @click="switchPage('overview')"
-        >
-          <el-icon><House /></el-icon>
-          <span>概览</span>
-        </div>
-        
-        <!-- 基础配置 -->
-        <div 
-          class="sidebar-item"
-          :class="{ active: currentPage === 'basic' }"
-          @click="switchPage('basic')"
+        <div class="sidebar-menu">
+          <!-- 概览 -->
+          <div 
+            class="sidebar-item"
+            :class="{ active: currentPage === 'overview' }"
+            @click="switchPage('overview')"
+          >
+            <el-icon><House /></el-icon>
+            <span>概览</span>
+          </div>
+          
+          <!-- 基础配置 -->
+          <div 
+            class="sidebar-item"
+            :class="{ active: currentPage === 'basic' }"
+            @click="switchPage('basic')"
         >
           <el-icon><Setting /></el-icon>
           <span>基础配置</span>
@@ -89,6 +84,13 @@
             </div>
           </div>
         </template>
+        </div>
+        <div class="sidebar-footer">
+          <div class="sidebar-item back-item" @click="$router.push('/apps')">
+            <el-icon><ArrowLeft /></el-icon>
+            <span>返回APP列表</span>
+          </div>
+        </div>
       </div>
 
       <!-- 右侧内容区 -->
@@ -1484,6 +1486,27 @@ onMounted(() => {
   border-right: 1px solid #e4e7ed;
   overflow-y: auto;
   padding: 16px 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-menu {
+  flex: 1;
+}
+
+.sidebar-footer {
+  border-top: 1px solid #e4e7ed;
+  padding-top: 8px;
+  margin-top: 8px;
+  
+  .back-item {
+    color: #909399;
+    
+    &:hover {
+      color: #409eff;
+      background: #f5f7fa;
+    }
+  }
 }
 
 .sidebar-item {

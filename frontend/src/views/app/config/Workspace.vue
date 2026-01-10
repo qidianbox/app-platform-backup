@@ -2,15 +2,23 @@
   <div class="workspace">
     <!-- 工作台侧边栏 -->
     <div class="workspace-sidebar">
-      <div 
-        v-for="item in menuItems" 
-        :key="item.key"
-        class="menu-item"
-        :class="{ active: currentMenu === item.key }"
-        @click="currentMenu = item.key"
-      >
-        <el-icon><component :is="item.icon" /></el-icon>
-        <span>{{ item.label }}</span>
+      <div class="sidebar-menu">
+        <div 
+          v-for="item in menuItems" 
+          :key="item.key"
+          class="menu-item"
+          :class="{ active: currentMenu === item.key }"
+          @click="currentMenu = item.key"
+        >
+          <el-icon><component :is="item.icon" /></el-icon>
+          <span>{{ item.label }}</span>
+        </div>
+      </div>
+      <div class="sidebar-footer">
+        <div class="menu-item back-item" @click="$router.push('/apps')">
+          <el-icon><ArrowLeft /></el-icon>
+          <span>返回APP列表</span>
+        </div>
       </div>
     </div>
 
@@ -481,7 +489,7 @@ import * as echarts from 'echarts'
 import { 
   DataLine, User, UserFilled, Warning, Top, Bottom,
   Plus, Download, Refresh, Search,
-  House, Management, Bell, Document, Promotion
+  House, Management, Bell, Document, Promotion, ArrowLeft
 } from '@element-plus/icons-vue'
 import {
   getUserList, getUserStats, updateUserStatus,
@@ -1018,6 +1026,28 @@ watch(() => props.appId, () => {
   background: white;
   border-right: 1px solid #e4e7ed;
   padding: 16px 0;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.sidebar-menu {
+  flex: 1;
+}
+
+.sidebar-footer {
+  border-top: 1px solid #e4e7ed;
+  padding-top: 8px;
+  margin-top: 8px;
+  
+  .back-item {
+    color: #909399;
+    
+    &:hover {
+      color: #409eff;
+      background: #f5f7fa;
+    }
+  }
 }
 
 .menu-item {

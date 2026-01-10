@@ -1,0 +1,202 @@
+[
+  {
+    "page": "登录页",
+    "device": "Desktop_1920x1080",
+    "status": "new_baseline",
+    "diff_percentage": 0,
+    "screenshot": "/home/ubuntu/app-platform/test_results/visual_test/current/登录页_Desktop_1920x1080_20260110_133615.png",
+    "baseline": "/home/ubuntu/app-platform/test_results/visual_test/baseline/登录页_Desktop_1920x1080_20260110_133615.png",
+    "diff_image": "",
+    "error": ""
+  },
+  {
+    "page": "登录页",
+    "device": "Laptop_1366x768",
+    "status": "new_baseline",
+    "diff_percentage": 0,
+    "screenshot": "/home/ubuntu/app-platform/test_results/visual_test/current/登录页_Laptop_1366x768_20260110_133615.png",
+    "baseline": "/home/ubuntu/app-platform/test_results/visual_test/baseline/登录页_Laptop_1366x768_20260110_133615.png",
+    "diff_image": "",
+    "error": ""
+  },
+  {
+    "page": "登录页",
+    "device": "Tablet_768x1024",
+    "status": "new_baseline",
+    "diff_percentage": 0,
+    "screenshot": "/home/ubuntu/app-platform/test_results/visual_test/current/登录页_Tablet_768x1024_20260110_133615.png",
+    "baseline": "/home/ubuntu/app-platform/test_results/visual_test/baseline/登录页_Tablet_768x1024_20260110_133615.png",
+    "diff_image": "",
+    "error": ""
+  },
+  {
+    "page": "登录页",
+    "device": "Mobile_375x667",
+    "status": "new_baseline",
+    "diff_percentage": 0,
+    "screenshot": "/home/ubuntu/app-platform/test_results/visual_test/current/登录页_Mobile_375x667_20260110_133615.png",
+    "baseline": "/home/ubuntu/app-platform/test_results/visual_test/baseline/登录页_Mobile_375x667_20260110_133615.png",
+    "diff_image": "",
+    "error": ""
+  },
+  {
+    "page": "APP列表页",
+    "device": "Desktop_1920x1080",
+    "status": "new_baseline",
+    "diff_percentage": 0,
+    "screenshot": "/home/ubuntu/app-platform/test_results/visual_test/current/APP列表页_Desktop_1920x1080_20260110_133615.png",
+    "baseline": "/home/ubuntu/app-platform/test_results/visual_test/baseline/APP列表页_Desktop_1920x1080_20260110_133615.png",
+    "diff_image": "",
+    "error": ""
+  },
+  {
+    "page": "APP列表页",
+    "device": "Laptop_1366x768",
+    "status": "new_baseline",
+    "diff_percentage": 0,
+    "screenshot": "/home/ubuntu/app-platform/test_results/visual_test/current/APP列表页_Laptop_1366x768_20260110_133615.png",
+    "baseline": "/home/ubuntu/app-platform/test_results/visual_test/baseline/APP列表页_Laptop_1366x768_20260110_133615.png",
+    "diff_image": "",
+    "error": ""
+  },
+  {
+    "page": "APP列表页",
+    "device": "Tablet_768x1024",
+    "status": "new_baseline",
+    "diff_percentage": 0,
+    "screenshot": "/home/ubuntu/app-platform/test_results/visual_test/current/APP列表页_Tablet_768x1024_20260110_133615.png",
+    "baseline": "/home/ubuntu/app-platform/test_results/visual_test/baseline/APP列表页_Tablet_768x1024_20260110_133615.png",
+    "diff_image": "",
+    "error": ""
+  },
+  {
+    "page": "APP列表页",
+    "device": "Mobile_375x667",
+    "status": "new_baseline",
+    "diff_percentage": 0,
+    "screenshot": "/home/ubuntu/app-platform/test_results/visual_test/current/APP列表页_Mobile_375x667_20260110_133615.png",
+    "baseline": "/home/ubuntu/app-platform/test_results/visual_test/baseline/APP列表页_Mobile_375x667_20260110_133615.png",
+    "diff_image": "",
+    "error": ""
+  },
+  {
+    "page": "APP详情-概览",
+    "device": "Desktop_1920x1080",
+    "status": "new_baseline",
+    "diff_percentage": 0,
+    "screenshot": "/home/ubuntu/app-platform/test_results/visual_test/current/APP详情_概览_Desktop_1920x1080_20260110_133615.png",
+    "baseline": "/home/ubuntu/app-platform/test_results/visual_test/baseline/APP详情_概览_Desktop_1920x1080_20260110_133615.png",
+    "diff_image": "",
+    "error": ""
+  },
+  {
+    "page": "APP详情-概览",
+    "device": "Laptop_1366x768",
+    "status": "new_baseline",
+    "diff_percentage": 0,
+    "screenshot": "/home/ubuntu/app-platform/test_results/visual_test/current/APP详情_概览_Laptop_1366x768_20260110_133615.png",
+    "baseline": "/home/ubuntu/app-platform/test_results/visual_test/baseline/APP详情_概览_Laptop_1366x768_20260110_133615.png",
+    "diff_image": "",
+    "error": ""
+  },
+  {
+    "page": "APP详情-概览",
+    "device": "Tablet_768x1024",
+    "status": "new_baseline",
+    "diff_percentage": 0,
+    "screenshot": "/home/ubuntu/app-platform/test_results/visual_test/current/APP详情_概览_Tablet_768x1024_20260110_133615.png",
+    "baseline": "/home/ubuntu/app-platform/test_results/visual_test/baseline/APP详情_概览_Tablet_768x1024_20260110_133615.png",
+    "diff_image": "",
+    "error": ""
+  },
+  {
+    "page": "APP详情-概览",
+    "device": "Mobile_375x667",
+    "status": "new_baseline",
+    "diff_percentage": 0,
+    "screenshot": "/home/ubuntu/app-platform/test_results/visual_test/current/APP详情_概览_Mobile_375x667_20260110_133615.png",
+    "baseline": "/home/ubuntu/app-platform/test_results/visual_test/baseline/APP详情_概览_Mobile_375x667_20260110_133615.png",
+    "diff_image": "",
+    "error": ""
+  },
+  {
+    "page": "APP详情-基础配置",
+    "device": "Desktop_1920x1080",
+    "status": "new_baseline",
+    "diff_percentage": 0,
+    "screenshot": "/home/ubuntu/app-platform/test_results/visual_test/current/APP详情_基础配置_Desktop_1920x1080_20260110_133615.png",
+    "baseline": "/home/ubuntu/app-platform/test_results/visual_test/baseline/APP详情_基础配置_Desktop_1920x1080_20260110_133615.png",
+    "diff_image": "",
+    "error": ""
+  },
+  {
+    "page": "APP详情-基础配置",
+    "device": "Laptop_1366x768",
+    "status": "new_baseline",
+    "diff_percentage": 0,
+    "screenshot": "/home/ubuntu/app-platform/test_results/visual_test/current/APP详情_基础配置_Laptop_1366x768_20260110_133615.png",
+    "baseline": "/home/ubuntu/app-platform/test_results/visual_test/baseline/APP详情_基础配置_Laptop_1366x768_20260110_133615.png",
+    "diff_image": "",
+    "error": ""
+  },
+  {
+    "page": "APP详情-基础配置",
+    "device": "Tablet_768x1024",
+    "status": "new_baseline",
+    "diff_percentage": 0,
+    "screenshot": "/home/ubuntu/app-platform/test_results/visual_test/current/APP详情_基础配置_Tablet_768x1024_20260110_133615.png",
+    "baseline": "/home/ubuntu/app-platform/test_results/visual_test/baseline/APP详情_基础配置_Tablet_768x1024_20260110_133615.png",
+    "diff_image": "",
+    "error": ""
+  },
+  {
+    "page": "APP详情-基础配置",
+    "device": "Mobile_375x667",
+    "status": "new_baseline",
+    "diff_percentage": 0,
+    "screenshot": "/home/ubuntu/app-platform/test_results/visual_test/current/APP详情_基础配置_Mobile_375x667_20260110_133615.png",
+    "baseline": "/home/ubuntu/app-platform/test_results/visual_test/baseline/APP详情_基础配置_Mobile_375x667_20260110_133615.png",
+    "diff_image": "",
+    "error": ""
+  },
+  {
+    "page": "APP详情-工作台",
+    "device": "Desktop_1920x1080",
+    "status": "new_baseline",
+    "diff_percentage": 0,
+    "screenshot": "/home/ubuntu/app-platform/test_results/visual_test/current/APP详情_工作台_Desktop_1920x1080_20260110_133615.png",
+    "baseline": "/home/ubuntu/app-platform/test_results/visual_test/baseline/APP详情_工作台_Desktop_1920x1080_20260110_133615.png",
+    "diff_image": "",
+    "error": ""
+  },
+  {
+    "page": "APP详情-工作台",
+    "device": "Laptop_1366x768",
+    "status": "new_baseline",
+    "diff_percentage": 0,
+    "screenshot": "/home/ubuntu/app-platform/test_results/visual_test/current/APP详情_工作台_Laptop_1366x768_20260110_133615.png",
+    "baseline": "/home/ubuntu/app-platform/test_results/visual_test/baseline/APP详情_工作台_Laptop_1366x768_20260110_133615.png",
+    "diff_image": "",
+    "error": ""
+  },
+  {
+    "page": "APP详情-工作台",
+    "device": "Tablet_768x1024",
+    "status": "new_baseline",
+    "diff_percentage": 0,
+    "screenshot": "/home/ubuntu/app-platform/test_results/visual_test/current/APP详情_工作台_Tablet_768x1024_20260110_133615.png",
+    "baseline": "/home/ubuntu/app-platform/test_results/visual_test/baseline/APP详情_工作台_Tablet_768x1024_20260110_133615.png",
+    "diff_image": "",
+    "error": ""
+  },
+  {
+    "page": "APP详情-工作台",
+    "device": "Mobile_375x667",
+    "status": "new_baseline",
+    "diff_percentage": 0,
+    "screenshot": "/home/ubuntu/app-platform/test_results/visual_test/current/APP详情_工作台_Mobile_375x667_20260110_133615.png",
+    "baseline": "/home/ubuntu/app-platform/test_results/visual_test/baseline/APP详情_工作台_Mobile_375x667_20260110_133615.png",
+    "diff_image": "",
+    "error": ""
+  }
+]

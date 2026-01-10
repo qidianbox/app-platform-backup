@@ -1,7 +1,82 @@
 <template>
   <div class="app-detail">
     <!-- 顶部导航栏 -->
-    <div class="top-header">
+    <header class="top-header" role="banner">
+      <!-- 移动端汉堡菜单 -->
+      <MobileMenu 
+        v-model="mobileMenuOpen" 
+        logo-text="拓" 
+        app-name="拓客APP中台"
+        @close="handleMobileMenuClose"
+      >
+        <!-- 移动端菜单内容 -->
+        <div class="mobile-nav-tabs">
+          <div 
+            class="mobile-nav-item" 
+            :class="{ active: activeTab === 'workspace' }"
+            @click="switchMobileTab('workspace')"
+          >
+            <el-icon><Monitor /></el-icon>
+            <span>工作台</span>
+          </div>
+          <div 
+            class="mobile-nav-item" 
+            :class="{ active: activeTab === 'config' }"
+            @click="switchMobileTab('config')"
+          >
+            <el-icon><Setting /></el-icon>
+            <span>配置中心</span>
+          </div>
+        </div>
+        
+        <!-- 配置中心菜单 -->
+        <div v-if="activeTab === 'config'" class="mobile-sidebar-menu">
+          <div 
+            class="mobile-menu-item"
+            :class="{ active: currentPage === 'overview' }"
+            @click="switchMobilePage('overview')"
+          >
+            <el-icon><House /></el-icon>
+            <span>概览</span>
+          </div>
+          <div 
+            class="mobile-menu-item"
+            :class="{ active: currentPage === 'basic' }"
+            @click="switchMobilePage('basic')"
+          >
+            <el-icon><Setting /></el-icon>
+            <span>基础配置</span>
+          </div>
+          <template v-for="group in moduleGroups" :key="group.key">
+            <div v-if="hasModulesInGroup(group.key)" class="mobile-menu-group">
+              <div class="mobile-group-title">
+                <el-icon><component :is="group.icon" /></el-icon>
+                <span>{{ group.name }}</span>
+              </div>
+              <div 
+                v-for="module in getModulesInGroup(group.key)" 
+                :key="module.source_module"
+                class="mobile-menu-item sub-item"
+                :class="{ active: currentPage === module.source_module }"
+                @click="switchMobilePage(module.source_module)"
+              >
+                <span>{{ module.name }}</span>
+              </div>
+            </div>
+          </template>
+        </div>
+        
+        <template #footer>
+          <div 
+            class="mobile-menu-item back-item" 
+            @click="goBackToList"
+          >
+            <el-icon><ArrowLeft /></el-icon>
+            <span>返回APP列表</span>
+          </div>
+        </template>
+      </MobileMenu>
+      
       <!-- 左侧：Logo + APP信息 + 工作台/配置中心 Tab -->
       <div class="header-left">
         <div class="header-logo">
@@ -36,15 +111,24 @@
 
     <div class="main-container">
       <!-- 左侧边栏 - 仅在配置中心模式显示 -->
-      <div class="sidebar" v-show="activeTab === 'config'">
-        <div class="sidebar-menu">
+      <aside 
+        class="sidebar" 
+        v-show="activeTab === 'config'"
+        role="navigation"
+        aria-label="配置中心导航"
+      >
+        <nav class="sidebar-menu" role="menu">
           <!-- 概览 -->
           <div 
             class="sidebar-item"
             :class="{ active: currentPage === 'overview' }"
             @click="switchPage('overview')"
+            role="menuitem"
+            tabindex="0"
+            aria-label="概览"
+            @keydown.enter="switchPage('overview')"
           >
-            <el-icon><House /></el-icon>
+            <el-icon aria-hidden="true"><House /></el-icon>
             <span>概览</span>
           </div>
           
@@ -53,10 +137,14 @@
             class="sidebar-item"
             :class="{ active: currentPage === 'basic' }"
             @click="switchPage('basic')"
-        >
-          <el-icon><Setting /></el-icon>
-          <span>基础配置</span>
-        </div>
+            role="menuitem"
+            tabindex="0"
+            aria-label="基础配置"
+            @keydown.enter="switchPage('basic')"
+          >
+            <el-icon aria-hidden="true"><Setting /></el-icon>
+            <span>基础配置</span>
+          </div>
 
         <!-- 模块分组 -->
         <template v-for="group in moduleGroups" :key="group.key">
@@ -89,14 +177,21 @@
             </div>
           </div>
         </template>
-        </div>
+        </nav>
         <div class="sidebar-footer">
-          <div class="sidebar-item back-item" @click="$router.push('/apps')">
-            <el-icon><ArrowLeft /></el-icon>
+          <div 
+            class="sidebar-item back-item" 
+            @click="$router.push('/apps')"
+            role="button"
+            tabindex="0"
+            aria-label="返回APP列表"
+            @keydown.enter="$router.push('/apps')"
+          >
+            <el-icon aria-hidden="true"><ArrowLeft /></el-icon>
             <span>返回APP列表</span>
           </div>
         </div>
-      </div>
+      </aside>
 
       <!-- 右侧内容区 -->
       <div class="content-area">
@@ -913,7 +1008,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { 
   ArrowLeft, ArrowRight, House, Setting, User, UserFilled, 
   CreditCard, ChatDotRound, DataLine, Document, Monitor, 
@@ -922,11 +1017,14 @@ import {
 import { ElMessage, ElMessageBox } from 'element-plus'
 import request from '@/utils/request'
 import Workspace from './Workspace.vue'
+import MobileMenu from '@/components/MobileMenu.vue'
 
 const route = useRoute()
+const router = useRouter()
 const appId = computed(() => route.params.id)
 
 const activeTab = ref('config') // 默认显示配置中心
+const mobileMenuOpen = ref(false) // 移动端菜单状态
 const currentPage = ref('overview')
 const expandedGroups = ref(['user', 'message', 'data', 'system', 'storage'])
 const adminName = ref(localStorage.getItem('adminName') || 'Admin')
@@ -1111,6 +1209,34 @@ const switchPage = (page) => {
   if (page !== 'overview' && page !== 'basic') {
     loadModuleConfig(page)
   }
+}
+
+// 移动端菜单关闭处理
+const handleMobileMenuClose = () => {
+  mobileMenuOpen.value = false
+}
+
+// 移动端切换Tab
+const switchMobileTab = (tab) => {
+  activeTab.value = tab
+  if (tab === 'workspace') {
+    mobileMenuOpen.value = false
+  }
+}
+
+// 移动端切换页面
+const switchMobilePage = (page) => {
+  currentPage.value = page
+  mobileMenuOpen.value = false
+  if (page !== 'overview' && page !== 'basic') {
+    loadModuleConfig(page)
+  }
+}
+
+// 返回APP列表
+const goBackToList = () => {
+  mobileMenuOpen.value = false
+  router.push('/apps')
 }
 
 // 切换分组展开/收起
@@ -1726,16 +1852,155 @@ onMounted(() => {
 :deep(.el-input-number) {
   width: 150px;
 }
-</style>
 
+/* 移动端菜单样式 */
+.mobile-nav-tabs {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0 12px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid #e4e7ed;
+  padding-bottom: 16px;
+}
 
-.workspace-content {
-  padding: 24px;
-  
-  .page-title {
-    font-size: 24px;
+.mobile-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #606266;
+  font-size: 15px;
+  transition: all 0.2s;
+
+  &:hover {
+    background: #f5f7fa;
+    color: #409eff;
+  }
+
+  &.active {
+    background: #ecf5ff;
+    color: #409eff;
     font-weight: 600;
-    color: #303133;
-    margin-bottom: 20px;
+  }
+
+  .el-icon {
+    font-size: 18px;
   }
 }
+
+.mobile-sidebar-menu {
+  padding: 0 12px;
+}
+
+.mobile-menu-group {
+  margin-bottom: 8px;
+}
+
+.mobile-group-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  color: #909399;
+  font-size: 13px;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.mobile-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #606266;
+  font-size: 15px;
+  transition: all 0.2s;
+
+  &:hover {
+    background: #f5f7fa;
+    color: #409eff;
+  }
+
+  &.active {
+    background: #ecf5ff;
+    color: #409eff;
+    font-weight: 600;
+  }
+
+  &.sub-item {
+    padding-left: 48px;
+    font-size: 14px;
+  }
+
+  &.back-item {
+    color: #909399;
+    
+    &:hover {
+      color: #409eff;
+      background: #f5f7fa;
+    }
+  }
+
+  .el-icon {
+    font-size: 18px;
+  }
+}
+
+/* 移动端响应式样式 */
+@media (max-width: 768px) {
+  .header-logo,
+  .header-nav {
+    display: none;
+  }
+
+  .sidebar {
+    display: none !important;
+  }
+
+  .content-area {
+    width: 100% !important;
+  }
+
+  .page-content {
+    padding: 16px !important;
+  }
+
+  .stats-cards {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px !important;
+  }
+
+  .info-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .config-form {
+    padding: 16px !important;
+  }
+
+  :deep(.el-form-item__label) {
+    width: 100% !important;
+    text-align: left !important;
+    margin-bottom: 8px;
+  }
+
+  :deep(.el-form-item__content) {
+    margin-left: 0 !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .stats-cards {
+    grid-template-columns: 1fr !important;
+  }
+
+  .page-title {
+    font-size: 20px !important;
+  }
+}
+</style>

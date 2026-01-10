@@ -13,6 +13,8 @@ import (
 	_ "app-platform-backend/modules/push"
 	_ "app-platform-backend/modules/user"
 	_ "app-platform-backend/modules/version"
+	_ "app-platform-backend/modules/websocket"
+	_ "app-platform-backend/modules/audit"
 )
 
 // LoadAllModules 是一个空函数，其唯一目的是确保此包被导入

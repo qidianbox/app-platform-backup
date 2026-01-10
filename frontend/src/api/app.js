@@ -85,3 +85,8 @@ export const deleteEventDefinition = (id) => request.delete(`/events/definitions
 export const updateAlert = (id, data) => request.put(`/monitor/alerts/${id}`, data)
 export const deleteAlert = (id) => request.delete(`/monitor/alerts/${id}`)
 export const getHealthCheck = () => request.get('/monitor/health')
+
+// 审计日志API
+export const getAuditLogs = (params) => request.get('/audit', { params })
+export const getAuditStats = (params) => request.get('/audit/stats', { params })
+export const exportAuditLogs = (params) => request.get('/audit/export', { params, responseType: 'blob' })

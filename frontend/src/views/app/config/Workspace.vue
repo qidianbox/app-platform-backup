@@ -686,8 +686,16 @@
       <!-- 监控告警 -->
       <div v-else-if="currentMenu === 'monitor'" class="content-section">
         <div class="section-header">
-          <h2>监控告警</h2>
-          <p>实时监控应用运行状态</p>
+          <div class="header-left">
+            <h2>监控告警</h2>
+            <p>实时监控应用运行状态</p>
+          </div>
+          <div class="header-right">
+            <el-tag :type="wsConnected ? 'success' : 'danger'" size="small">
+              <el-icon style="margin-right: 4px;"><Connection /></el-icon>
+              {{ wsConnected ? 'WebSocket已连接' : 'WebSocket未连接' }}
+            </el-tag>
+          </div>
         </div>
 
         <!-- 监控指标卡片 -->
@@ -814,6 +822,116 @@
           </el-tab-pane>
         </el-tabs>
       </div>
+
+      <!-- 审计日志 -->
+      <div v-else-if="currentMenu === 'audit'" class="content-section">
+        <div class="section-header">
+          <h2>审计日志</h2>
+          <p>查看系统操作记录和安全审计</p>
+        </div>
+
+        <!-- 审计统计卡片 -->
+        <div class="stats-grid">
+          <div class="stat-card blue">
+            <div class="stat-content">
+              <div class="stat-value">{{ auditStats.total_count?.toLocaleString() || 0 }}</div>
+              <div class="stat-label">总操作数</div>
+            </div>
+            <div class="stat-icon"><el-icon><DataLine /></el-icon></div>
+          </div>
+          <div class="stat-card green">
+            <div class="stat-content">
+              <div class="stat-value">{{ auditStats.user_stats?.length || 0 }}</div>
+              <div class="stat-label">活跃用户</div>
+            </div>
+            <div class="stat-icon"><el-icon><User /></el-icon></div>
+          </div>
+          <div class="stat-card orange">
+            <div class="stat-content">
+              <div class="stat-value">{{ auditStats.action_stats?.length || 0 }}</div>
+              <div class="stat-label">操作类型</div>
+            </div>
+            <div class="stat-icon"><el-icon><Management /></el-icon></div>
+          </div>
+          <div class="stat-card purple">
+            <div class="stat-content">
+              <div class="stat-value">{{ auditStats.resource_stats?.length || 0 }}</div>
+              <div class="stat-label">资源类型</div>
+            </div>
+            <div class="stat-icon"><el-icon><FolderOpened /></el-icon></div>
+          </div>
+        </div>
+
+        <!-- 搜索和筛选 -->
+        <div class="filter-bar">
+          <el-input v-model="auditSearch.keyword" placeholder="搜索描述、用户名、IP" style="width: 200px" clearable>
+            <template #prefix><el-icon><Search /></el-icon></template>
+          </el-input>
+          <el-select v-model="auditSearch.action" placeholder="操作类型" clearable style="width: 120px">
+            <el-option label="查看" value="view" />
+            <el-option label="创建" value="create" />
+            <el-option label="更新" value="update" />
+            <el-option label="删除" value="delete" />
+            <el-option label="登录" value="login" />
+            <el-option label="登出" value="logout" />
+            <el-option label="导出" value="export" />
+          </el-select>
+          <el-select v-model="auditSearch.resource" placeholder="资源类型" clearable style="width: 120px">
+            <el-option label="用户" value="user" />
+            <el-option label="应用" value="app" />
+            <el-option label="配置" value="config" />
+            <el-option label="消息" value="message" />
+            <el-option label="推送" value="push" />
+            <el-option label="文件" value="file" />
+            <el-option label="版本" value="version" />
+          </el-select>
+          <el-date-picker v-model="auditSearch.dateRange" type="daterange" range-separator="-" start-placeholder="开始日期" end-placeholder="结束日期" style="width: 240px" />
+          <el-button type="primary" @click="fetchAuditLogs"><el-icon><Search /></el-icon>查询</el-button>
+          <el-button @click="exportAuditLogsData"><el-icon><Download /></el-icon>导出</el-button>
+        </div>
+
+        <!-- 审计日志列表 -->
+        <el-table :data="auditLogs" v-loading="auditLoading" stripe style="margin-top: 16px">
+          <el-table-column prop="id" label="ID" width="80" />
+          <el-table-column prop="created_at" label="时间" width="180">
+            <template #default="{ row }">
+              {{ formatDate(row.created_at) }}
+            </template>
+          </el-table-column>
+          <el-table-column prop="user_name" label="用户" width="120" />
+          <el-table-column prop="action" label="操作" width="100">
+            <template #default="{ row }">
+              <el-tag :type="getActionTagType(row.action)" size="small">{{ getActionLabel(row.action) }}</el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column prop="resource" label="资源" width="100">
+            <template #default="{ row }">
+              {{ getResourceLabel(row.resource) }}
+            </template>
+          </el-table-column>
+          <el-table-column prop="description" label="描述" min-width="150" />
+          <el-table-column prop="ip_address" label="IP地址" width="140" />
+          <el-table-column prop="status_code" label="状态码" width="80">
+            <template #default="{ row }">
+              <el-tag :type="row.status_code < 400 ? 'success' : 'danger'" size="small">{{ row.status_code }}</el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column prop="duration" label="耗时(ms)" width="100" />
+        </el-table>
+
+        <!-- 分页 -->
+        <div class="pagination-wrapper">
+          <el-pagination
+            v-model:current-page="auditPage"
+            v-model:page-size="auditPageSize"
+            :total="auditTotal"
+            :page-sizes="[20, 50, 100]"
+            layout="total, sizes, prev, pager, next"
+            @size-change="fetchAuditLogs"
+            @current-change="fetchAuditLogs"
+          />
+        </div>
+      </div>
     </div>
 
     <!-- 发布新版本对话框 -->
@@ -856,14 +974,15 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, onUnmounted, watch } from 'vue'
+import wsClient from '@/utils/websocket'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import * as echarts from 'echarts'
 import { 
   DataLine, User, UserFilled, Warning, Top, Bottom,
   Plus, Download, Refresh, Search, Delete, Upload, View, Edit,
   House, Management, Bell, Document, Promotion, ArrowLeft,
-  FolderOpened, DataAnalysis, Monitor, PieChart, TrendCharts, Timer, Connection
+  FolderOpened, DataAnalysis, Monitor, PieChart, TrendCharts, Timer, Connection, Lock
 } from '@element-plus/icons-vue'
 import {
   getUserList, getUserStats, updateUserStatus,
@@ -875,7 +994,9 @@ import {
   // 数据埋点
   getEventList, getEventStats, getFunnelAnalysis, getEventDefinitions, createEventDefinition, deleteEventDefinition,
   // 监控告警
-  getMonitorMetrics, getAlertList, createAlert, updateAlert, deleteAlert, getMonitorStats, getHealthCheck
+  getMonitorMetrics, getAlertList, createAlert, updateAlert, deleteAlert, getMonitorStats, getHealthCheck,
+  // 审计日志
+  getAuditLogs, getAuditStats, exportAuditLogs
 } from '@/api/app'
 
 const props = defineProps({
@@ -892,7 +1013,8 @@ const menuItems = [
   { key: 'events', label: '数据埋点', icon: DataAnalysis },
   { key: 'monitor', label: '监控告警', icon: Monitor },
   { key: 'logs', label: '日志查询', icon: Document },
-  { key: 'versions', label: '版本管理', icon: Promotion }
+  { key: 'versions', label: '版本管理', icon: Promotion },
+  { key: 'audit', label: '审计日志', icon: Lock }
 ]
 
 const currentMenu = ref('overview')
@@ -1021,6 +1143,20 @@ const alertLoading = ref(false)
 const alertStatus = ref('')
 const alertRules = ref([])
 const alertRuleLoading = ref(false)
+
+// 审计日志相关变量
+const auditLogs = ref([])
+const auditLoading = ref(false)
+const auditPage = ref(1)
+const auditPageSize = ref(20)
+const auditTotal = ref(0)
+const auditStats = ref({})
+const auditSearch = ref({
+  keyword: '',
+  action: '',
+  resource: '',
+  dateRange: null
+})
 const showAlertRuleDialog = ref(false)
 
 // 格式化日期
@@ -1805,6 +1941,121 @@ const fetchAlertRules = async () => {
   }
 }
 
+// 审计日志相关函数
+const fetchAuditLogs = async () => {
+  if (!props.appId) return
+  auditLoading.value = true
+  try {
+    const params = {
+      app_id: props.appId,
+      page: auditPage.value,
+      page_size: auditPageSize.value,
+      keyword: auditSearch.value.keyword,
+      action: auditSearch.value.action,
+      resource: auditSearch.value.resource
+    }
+    if (auditSearch.value.dateRange && auditSearch.value.dateRange.length === 2) {
+      params.start_time = formatDateForApi(auditSearch.value.dateRange[0])
+      params.end_time = formatDateForApi(auditSearch.value.dateRange[1])
+    }
+    const res = await getAuditLogs(params)
+    if (res.code === 0) {
+      auditLogs.value = res.data.list || []
+      auditTotal.value = res.data.total || 0
+    }
+  } catch (error) {
+    console.error('获取审计日志失败:', error)
+  } finally {
+    auditLoading.value = false
+  }
+}
+
+const fetchAuditStats = async () => {
+  if (!props.appId) return
+  try {
+    const res = await getAuditStats({ app_id: props.appId, days: 7 })
+    if (res.code === 0) {
+      auditStats.value = res.data || {}
+    }
+  } catch (error) {
+    console.error('获取审计统计失败:', error)
+  }
+}
+
+const exportAuditLogsData = async () => {
+  try {
+    const params = {
+      app_id: props.appId,
+      format: 'csv'
+    }
+    if (auditSearch.value.dateRange && auditSearch.value.dateRange.length === 2) {
+      params.start_time = formatDateForApi(auditSearch.value.dateRange[0])
+      params.end_time = formatDateForApi(auditSearch.value.dateRange[1])
+    }
+    const res = await exportAuditLogs(params)
+    const blob = new Blob([res], { type: 'text/csv' })
+    const url = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `audit_logs_${new Date().toISOString().slice(0, 10)}.csv`
+    a.click()
+    window.URL.revokeObjectURL(url)
+    ElMessage.success('导出成功')
+  } catch (error) {
+    console.error('导出审计日志失败:', error)
+    ElMessage.error('导出失败')
+  }
+}
+
+const formatDateForApi = (date) => {
+  const d = new Date(date)
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} 00:00:00`
+}
+
+const getActionTagType = (action) => {
+  const types = {
+    view: 'info',
+    create: 'success',
+    update: 'warning',
+    delete: 'danger',
+    login: 'success',
+    logout: 'info',
+    export: 'primary'
+  }
+  return types[action] || 'info'
+}
+
+const getActionLabel = (action) => {
+  const labels = {
+    view: '查看',
+    create: '创建',
+    update: '更新',
+    delete: '删除',
+    login: '登录',
+    logout: '登出',
+    export: '导出',
+    send: '发送',
+    publish: '发布'
+  }
+  return labels[action] || action
+}
+
+const getResourceLabel = (resource) => {
+  const labels = {
+    user: '用户',
+    app: '应用',
+    config: '配置',
+    message: '消息',
+    push: '推送',
+    file: '文件',
+    version: '版本',
+    log: '日志',
+    event: '事件',
+    monitor: '监控'
+  }
+  return labels[resource] || resource
+}
+
 // 初始化图表
 const initCharts = () => {
   if (requestChartRef.value) {
@@ -1862,9 +2113,108 @@ const loadData = () => {
   fetchLogStats()
 }
 
+// WebSocket相关变量
+const wsConnected = ref(false)
+const realtimeAlerts = ref([])
+
+// 初始化WebSocket连接
+const initWebSocket = () => {
+  if (!props.appId) return
+  
+  // 请求通知权限
+  wsClient.constructor.requestNotificationPermission()
+  
+  // 连接WebSocket
+  wsClient.connect(props.appId, 'admin')
+  
+  // 监听连接事件
+  wsClient.on('connected', () => {
+    wsConnected.value = true
+    console.log('[Workspace] WebSocket connected')
+  })
+  
+  wsClient.on('disconnected', () => {
+    wsConnected.value = false
+    console.log('[Workspace] WebSocket disconnected')
+  })
+  
+  // 监听监控数据
+  wsClient.on('monitor', (data) => {
+    console.log('[Workspace] Monitor data:', data)
+    if (data.cpu_usage !== undefined) {
+      monitorStats.value.cpu_usage = data.cpu_usage
+    }
+    if (data.memory_usage !== undefined) {
+      monitorStats.value.memory_usage = data.memory_usage
+    }
+    if (data.request_count !== undefined) {
+      // 更新请求数图表
+      updateRequestChart(data)
+    }
+  })
+  
+  // 监听告警事件
+  wsClient.on('alert', (data) => {
+    console.log('[Workspace] Alert:', data)
+    realtimeAlerts.value.unshift(data)
+    if (realtimeAlerts.value.length > 10) {
+      realtimeAlerts.value.pop()
+    }
+    // 刷新告警列表
+    if (currentMenu.value === 'monitor' && monitorTab.value === 'alerts') {
+      fetchAlertList()
+    }
+    // 显示告警提示
+    const levelMap = { critical: 'error', warning: 'warning', info: 'info' }
+    ElMessage[levelMap[data.level] || 'warning']({
+      message: `告警: ${data.title || data.message}`,
+      duration: 5000
+    })
+  })
+  
+  // 监听通知事件
+  wsClient.on('notification', (data) => {
+    console.log('[Workspace] Notification:', data)
+    ElMessage.info({
+      message: data.title || data.message,
+      duration: 3000
+    })
+  })
+}
+
+// 更新请求数图表
+const updateRequestChart = (data) => {
+  if (requestMetricChart && data.timestamp && data.request_count !== undefined) {
+    const chart = requestMetricChart
+    const option = chart.getOption()
+    if (option && option.xAxis && option.series) {
+      const time = new Date(data.timestamp).toLocaleTimeString()
+      option.xAxis[0].data.push(time)
+      option.series[0].data.push(data.request_count)
+      // 保持最近20个数据点
+      if (option.xAxis[0].data.length > 20) {
+        option.xAxis[0].data.shift()
+        option.series[0].data.shift()
+      }
+      chart.setOption(option)
+    }
+  }
+}
+
+// 断开WebSocket连接
+const disconnectWebSocket = () => {
+  wsClient.disconnect()
+  wsConnected.value = false
+}
+
 onMounted(() => {
   setTimeout(initCharts, 100)
   loadData()
+  initWebSocket()
+})
+
+onUnmounted(() => {
+  disconnectWebSocket()
 })
 
 watch(currentMenu, (val) => {
@@ -1893,6 +2243,9 @@ watch(currentMenu, (val) => {
     setTimeout(() => fetchMonitorMetrics(), 100)
     if (monitorTab.value === 'alerts') fetchAlertList()
     if (monitorTab.value === 'rules') fetchAlertRules()
+  } else if (val === 'audit') {
+    fetchAuditLogs()
+    fetchAuditStats()
   }
 })
 
@@ -1979,6 +2332,19 @@ watch(() => props.appId, () => {
 
 .section-header {
   margin-bottom: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  
+  .header-left {
+    flex: 1;
+  }
+  
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
   
   h2 {
     font-size: 22px;

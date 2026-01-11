@@ -211,7 +211,11 @@
       <div class="content-area">
         <!-- 工作台模式 -->
         <template v-if="activeTab === 'workspace'">
-          <Workspace :app-id="appId" :app-info="appInfo" :initial-menu="workspaceMenu" />
+          <!-- 只有当appId有效时才渲染Workspace组件，避免空的appId触发API请求 -->
+          <Workspace v-if="appId" :app-id="appId" :app-info="appInfo" :initial-menu="workspaceMenu" />
+          <div v-else class="loading-placeholder">
+            <el-skeleton :rows="5" animated />
+          </div>
         </template>
 
         <!-- 配置中心模式 -->
@@ -1021,7 +1025,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { 
   ArrowLeft, ArrowRight, House, Setting, User, UserFilled, 
@@ -1319,6 +1323,7 @@ const getModulesInGroup = (groupKey) => {
 
 // 获取APP信息
 const fetchAppInfo = async () => {
+  if (!appId.value || appId.value === '') return
   try {
     const res = await request.get(`/apps/${appId.value}`)
     // request.js已解包，res直接是数据对象
@@ -1335,6 +1340,7 @@ const fetchAppInfo = async () => {
 
 // 获取APP模块列表
 const fetchAppModules = async () => {
+  if (!appId.value || appId.value === '') return
   try {
     const res = await request.get(`/apps/${appId.value}/modules`)
     // request.js已解包，res直接是数据数组
@@ -1414,6 +1420,7 @@ const getModuleConfigData = (moduleKey) => {
 
 // 加载模块配置
 const loadModuleConfig = async (moduleKey) => {
+  if (!appId.value || appId.value === '') return
   try {
     const res = await request.get(`/apps/${appId.value}/modules/${moduleKey}/config`)
     // request.js已解包，res直接是数据对象
@@ -1507,6 +1514,7 @@ const showConfigHistory = async (moduleKey) => {
 
 // 加载配置历史
 const loadConfigHistory = async (moduleKey) => {
+  if (!appId.value || appId.value === '') return
   loadingHistory.value = true
   try {
     const res = await request.get(`/apps/${appId.value}/modules/${moduleKey}/config/history`)
@@ -1555,8 +1563,19 @@ const formatConfig = (config) => {
 }
 
 onMounted(() => {
-  fetchAppInfo()
-  fetchAppModules()
+  // 只有当appId有效时才加载数据
+  if (appId.value && appId.value !== '') {
+    fetchAppInfo()
+    fetchAppModules()
+  }
+})
+
+// 监听appId变化，当appId从空变为有效时加载数据
+watch(appId, (newVal, oldVal) => {
+  if (newVal && newVal !== '' && (!oldVal || oldVal === '')) {
+    fetchAppInfo()
+    fetchAppModules()
+  }
 })
 </script>
 

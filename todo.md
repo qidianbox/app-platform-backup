@@ -600,3 +600,22 @@
   - 增强config/index.vue的移动端响应式样式
   - 统一表单样式优化
 - [x] 在Workspace组件中隐藏移动端侧边栏（使用汉堡菜单代替）
+
+
+## 2026-01-11 移动端app_id错误修复
+
+### 问题分析
+- [x] 分析app_id错误的根本原因（组件渲染时appId为空触发API请求）
+- [x] 确定修复方案（在父组件添加appId有效性检查）
+
+### 修复实施
+- [x] 在config/index.vue中添加appId有效性检查，只有当appId有效时才渲染Workspace组件
+- [x] 移除Workspace组件中watch appId的immediate选项
+- [x] 移除Workspace组件中watch initialMenu的immediate选项
+- [x] 增强onMounted逻辑，根据当前菜单加载对应数据
+- [x] 为config/index.vue中所有API调用函数添加appId有效性检查
+- [x] 添加appId变化监听，当appId从空变为有效时加载数据
+
+### 测试验证
+- [x] 桌面端测试通过（数据概览、监控告警、数据埋点、存储服务等页面正常加载）
+- [ ] 移动端测试（等待用户验证）

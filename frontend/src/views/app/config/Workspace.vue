@@ -2190,7 +2190,33 @@ onMounted(() => {
   setTimeout(initCharts, 100)
   // 只有当appId有效时才加载数据
   if (props.appId && props.appId !== '') {
-    loadData()
+    // 根据当前菜单加载对应数据
+    const menu = props.initialMenu || currentMenu.value
+    if (menu === 'overview') {
+      loadData()
+    } else if (menu === 'users') {
+      fetchUserList()
+    } else if (menu === 'logs') {
+      fetchLogList()
+      fetchLogStats()
+    } else if (menu === 'messages') {
+      fetchMessageList()
+    } else if (menu === 'versions') {
+      fetchVersionList()
+    } else if (menu === 'storage') {
+      fetchFileList()
+      fetchFileStats()
+    } else if (menu === 'events') {
+      fetchEventList()
+      fetchEventStats()
+    } else if (menu === 'monitor') {
+      fetchMonitorStats()
+      fetchHealthCheck()
+      setTimeout(() => fetchMonitorMetrics(), 100)
+    } else if (menu === 'audit') {
+      fetchAuditLogs()
+      fetchAuditStats()
+    }
     initWebSocket()
   }
 })
@@ -2237,26 +2263,29 @@ watch(currentMenu, (val) => {
   }
 })
 
-watch(() => props.appId, (newVal) => {
+watch(() => props.appId, (newVal, oldVal) => {
   // 确保appId有效时才加载数据
   if (!newVal || newVal === '') return
-  loadData()
-  if (currentMenu.value === 'users') fetchUserList()
-  if (currentMenu.value === 'logs') fetchLogList()
-  if (currentMenu.value === 'messages') fetchMessageList()
-  if (currentMenu.value === 'versions') fetchVersionList()
-  if (currentMenu.value === 'storage') { fetchFileList(); fetchFileStats() }
-  if (currentMenu.value === 'events') { fetchEventList(); fetchEventStats() }
-  if (currentMenu.value === 'monitor') { fetchMonitorStats(); fetchHealthCheck(); fetchMonitorMetrics() }
-}, { immediate: true })
+  // 如果appId变化了，重新加载数据
+  if (oldVal && oldVal !== newVal) {
+    loadData()
+    if (currentMenu.value === 'users') fetchUserList()
+    if (currentMenu.value === 'logs') fetchLogList()
+    if (currentMenu.value === 'messages') fetchMessageList()
+    if (currentMenu.value === 'versions') fetchVersionList()
+    if (currentMenu.value === 'storage') { fetchFileList(); fetchFileStats() }
+    if (currentMenu.value === 'events') { fetchEventList(); fetchEventStats() }
+    if (currentMenu.value === 'monitor') { fetchMonitorStats(); fetchHealthCheck(); fetchMonitorMetrics() }
+  }
+})
 
 // 监听父组件传入的initialMenu变化（移动端菜单切换）
 watch(() => props.initialMenu, (newVal) => {
   if (newVal && newVal !== currentMenu.value) {
     currentMenu.value = newVal
-    // 如果appId有效，触发数据加载（watch currentMenu会自动处理）
+    // watch currentMenu会自动处理数据加载
   }
-}, { immediate: true })
+})
 </script>
 
 <style lang="scss" scoped>

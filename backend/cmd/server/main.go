@@ -18,6 +18,7 @@ import (
 	"app-platform-backend/internal/config"
 	"app-platform-backend/internal/middleware"
 	"app-platform-backend/internal/pkg/database"
+	"app-platform-backend/internal/scheduler"
 
 	// 导入所有功能模块（通过 import 的副作用触发模块注册）
 	_ "app-platform-backend/modules"
@@ -44,6 +45,15 @@ func main() {
 	// 初始化审计日志数据库连接
 	middleware.InitAuditDB(database.GetDB())
 	log.Println("[Main] Audit logging initialized")
+
+	// 初始化并启动审计日志清理调度器
+	auditCleanupScheduler := scheduler.InitAuditCleanupScheduler(database.GetDB(), scheduler.AuditCleanupConfig{
+		RetentionDays: 90,  // 保留最近90天的日志
+		CleanupHour:   3,   // 每天凌晨3点执行清理
+		BatchSize:     1000, // 每批删除1000条
+	})
+	auditCleanupScheduler.Start()
+	log.Println("[Main] Audit log cleanup scheduler started (retention: 90 days, cleanup at 03:00)")
 
 	// 设置Gin模式
 	gin.SetMode(cfg.Server.Mode)

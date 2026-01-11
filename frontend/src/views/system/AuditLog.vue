@@ -52,6 +52,7 @@
           <el-button type="primary" @click="fetchLogs">查询</el-button>
           <el-button @click="resetFilters">重置</el-button>
           <el-button type="success" @click="exportLogs">导出CSV</el-button>
+          <el-button type="warning" @click="showCleanupDialog">清理日志</el-button>
         </el-form-item>
       </el-form>
     </el-card>
@@ -138,6 +139,70 @@
       </div>
     </el-card>
 
+    <!-- 清理弹窗 -->
+    <el-dialog v-model="cleanupVisible" title="清理审计日志" width="500px">
+      <el-alert
+        title="清理操作不可恢复"
+        type="warning"
+        :closable="false"
+        show-icon
+        style="margin-bottom: 20px"
+      />
+      
+      <el-form :model="cleanupForm" label-width="120px">
+        <el-form-item label="保留天数">
+          <el-input-number 
+            v-model="cleanupForm.retentionDays" 
+            :min="7" 
+            :max="365"
+            style="width: 200px"
+          />
+          <span style="margin-left: 10px; color: #909399">将删除 {{ cleanupForm.retentionDays }} 天前的日志</span>
+        </el-form-item>
+      </el-form>
+
+      <div v-if="cleanupConfig" style="margin-top: 20px; padding: 15px; background: #f5f7fa; border-radius: 4px;">
+        <h4 style="margin: 0 0 10px 0; font-size: 14px;">当前配置</h4>
+        <p style="margin: 5px 0; font-size: 13px; color: #606266;">
+          自动清理：每天凌晨 {{ cleanupConfig.cleanup_hour }}:00 执行
+        </p>
+        <p style="margin: 5px 0; font-size: 13px; color: #606266;">
+          默认保留：{{ cleanupConfig.retention_days }} 天
+        </p>
+      </div>
+
+      <div v-if="cleanupHistory.length > 0" style="margin-top: 20px;">
+        <h4 style="margin: 0 0 10px 0; font-size: 14px;">最近清理记录</h4>
+        <el-table :data="cleanupHistory" size="small" max-height="200">
+          <el-table-column prop="cleanup_time" label="时间" width="160">
+            <template #default="{ row }">
+              {{ formatTime(row.cleanup_time) }}
+            </template>
+          </el-table-column>
+          <el-table-column prop="deleted_rows" label="删除条数" width="100" />
+          <el-table-column prop="duration" label="耗时" width="80">
+            <template #default="{ row }">
+              {{ row.duration }}ms
+            </template>
+          </el-table-column>
+          <el-table-column prop="status" label="状态" width="80">
+            <template #default="{ row }">
+              <el-tag :type="row.status === 'success' ? 'success' : 'danger'" size="small">
+                {{ row.status === 'success' ? '成功' : '失败' }}
+              </el-tag>
+            </template>
+          </el-table-column>
+        </el-table>
+      </div>
+
+      <template #footer>
+        <el-button @click="cleanupVisible = false">取消</el-button>
+        <el-button type="danger" @click="executeCleanup" :loading="cleanupLoading">
+          确认清理
+        </el-button>
+      </template>
+    </el-dialog>
+
     <!-- 详情弹窗 -->
     <el-dialog v-model="detailVisible" title="操作详情" width="600px">
       <el-descriptions :column="2" border v-if="currentLog">
@@ -202,6 +267,13 @@ const logs = ref([])
 const stats = ref({})
 const detailVisible = ref(false)
 const currentLog = ref(null)
+const cleanupVisible = ref(false)
+const cleanupLoading = ref(false)
+const cleanupConfig = ref(null)
+const cleanupHistory = ref([])
+const cleanupForm = reactive({
+  retentionDays: 90
+})
 
 const filters = reactive({
   action: '',
@@ -353,6 +425,50 @@ const exportLogs = async () => {
     ElMessage.success('导出成功')
   } catch (error) {
     ElMessage.error('导出失败')
+  }
+}
+
+const showCleanupDialog = async () => {
+  cleanupVisible.value = true
+  // 获取清理配置
+  try {
+    const configRes = await request.get('/api/v1/audit/cleanup/config')
+    if (configRes.code === 0) {
+      cleanupConfig.value = configRes.data
+      cleanupForm.retentionDays = configRes.data.retention_days
+    }
+  } catch (error) {
+    console.error('获取清理配置失败:', error)
+  }
+  // 获取清理历史
+  try {
+    const historyRes = await request.get('/api/v1/audit/cleanup/history', { params: { limit: 5 } })
+    if (historyRes.code === 0) {
+      cleanupHistory.value = historyRes.data || []
+    }
+  } catch (error) {
+    console.error('获取清理历史失败:', error)
+  }
+}
+
+const executeCleanup = async () => {
+  cleanupLoading.value = true
+  try {
+    const res = await request.post('/api/v1/audit/cleanup', null, {
+      params: { retention_days: cleanupForm.retentionDays }
+    })
+    if (res.code === 0) {
+      ElMessage.success(`清理完成，删除了 ${res.data.deleted_rows} 条日志`)
+      cleanupVisible.value = false
+      fetchLogs()
+      fetchStats()
+    } else {
+      ElMessage.error(res.message || '清理失败')
+    }
+  } catch (error) {
+    ElMessage.error('清理失败')
+  } finally {
+    cleanupLoading.value = false
   }
 }
 

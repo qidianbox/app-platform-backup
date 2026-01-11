@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"time"
 
+	"app-platform-backend/internal/scheduler"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
@@ -293,6 +294,95 @@ func Export(c *gin.Context) {
 			"data": logs,
 		})
 	}
+}
+
+// Cleanup 手动清理审计日志
+func Cleanup(c *gin.Context) {
+	retentionDays, _ := strconv.Atoi(c.DefaultQuery("retention_days", "90"))
+	if retentionDays < 7 {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    400,
+			"message": "保留天数不能小于7天",
+		})
+		return
+	}
+
+	s := scheduler.GetScheduler()
+	if s == nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    500,
+			"message": "清理调度器未初始化",
+		})
+		return
+	}
+
+	deletedRows, err := s.ManualCleanup(retentionDays)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    500,
+			"message": "清理失败: " + err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"code": 0,
+		"data": gin.H{
+			"deleted_rows":   deletedRows,
+			"retention_days": retentionDays,
+		},
+		"message": "清理完成",
+	})
+}
+
+// CleanupHistory 获取清理历史记录
+func CleanupHistory(c *gin.Context) {
+	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "20"))
+
+	s := scheduler.GetScheduler()
+	if s == nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    500,
+			"message": "清理调度器未初始化",
+		})
+		return
+	}
+
+	records, err := s.GetCleanupHistory(limit)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    500,
+			"message": "获取清理历史失败: " + err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"code": 0,
+		"data": records,
+	})
+}
+
+// CleanupConfig 获取清理配置
+func CleanupConfig(c *gin.Context) {
+	s := scheduler.GetScheduler()
+	if s == nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    500,
+			"message": "清理调度器未初始化",
+		})
+		return
+	}
+
+	config := s.GetConfig()
+	c.JSON(http.StatusOK, gin.H{
+		"code": 0,
+		"data": gin.H{
+			"retention_days": config.RetentionDays,
+			"cleanup_hour":   config.CleanupHour,
+			"batch_size":     config.BatchSize,
+		},
+	})
 }
 
 

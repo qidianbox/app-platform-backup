@@ -782,3 +782,27 @@
   - 文件上传: 20次/分钟/IP
   - 错误报告: 30次/分钟/IP
 - [x] 添加限流响应头 - X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset, Retry-After
+
+
+## 2026-01-11 审计日志自动清理
+
+### 功能需求
+- [x] 实现定时任务，自动清理超过90天的审计日志
+  - 创建scheduler/audit_cleanup.go定时任务
+  - 每天凌晨3点自动执行
+  - 分批删除避免长时间锁表
+- [x] 添加清理配置（保留天数可配置）
+  - RetentionDays: 90天
+  - CleanupHour: 凌晨3点
+  - BatchSize: 1000条/批
+- [x] 记录清理日志（清理时间、清理数量）
+  - 创建cleanup_records表记录每次清理
+  - 记录删除数量、耗时、状态
+- [x] 添加手动清理API接口
+  - POST /api/v1/audit/cleanup - 手动清理
+  - GET /api/v1/audit/cleanup/history - 清理历史
+  - GET /api/v1/audit/cleanup/config - 清理配置
+- [x] 前端清理功能界面
+  - 审计日志页面添加"清理日志"按钮
+  - 显示当前配置和清理历史
+  - 支持自定义保留天数

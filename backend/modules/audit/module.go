@@ -33,6 +33,9 @@ func (m *AuditModule) RegisterRoutes(group *gin.RouterGroup) {
 		g.GET("/logs", auditapi.List)  // 别名路由，兼容前端请求
 		g.GET("/stats", auditapi.Stats)
 		g.GET("/export", auditapi.Export)
+		g.POST("/cleanup", auditapi.Cleanup)        // 手动清理
+		g.GET("/cleanup/history", auditapi.CleanupHistory) // 清理历史
+		g.GET("/cleanup/config", auditapi.CleanupConfig)   // 清理配置
 	}
 }
 

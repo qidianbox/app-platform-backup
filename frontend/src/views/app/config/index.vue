@@ -29,6 +29,20 @@
           </div>
         </div>
         
+        <!-- 工作台菜单 -->
+        <div v-if="activeTab === 'workspace'" class="mobile-sidebar-menu">
+          <div 
+            v-for="item in workspaceMenuItems" 
+            :key="item.key"
+            class="mobile-menu-item"
+            :class="{ active: workspaceMenu === item.key }"
+            @click="switchWorkspaceMenu(item.key)"
+          >
+            <el-icon><component :is="item.icon" /></el-icon>
+            <span>{{ item.label }}</span>
+          </div>
+        </div>
+        
         <!-- 配置中心菜单 -->
         <div v-if="activeTab === 'config'" class="mobile-sidebar-menu">
           <div 
@@ -197,7 +211,7 @@
       <div class="content-area">
         <!-- 工作台模式 -->
         <template v-if="activeTab === 'workspace'">
-          <Workspace :app-id="appId" :app-info="appInfo" />
+          <Workspace :app-id="appId" :app-info="appInfo" :initial-menu="workspaceMenu" />
         </template>
 
         <!-- 配置中心模式 -->
@@ -1012,7 +1026,8 @@ import { useRoute, useRouter } from 'vue-router'
 import { 
   ArrowLeft, ArrowRight, House, Setting, User, UserFilled, 
   CreditCard, ChatDotRound, DataLine, Document, Monitor, 
-  FolderOpened, Tools, Box, Grid, Warning, CopyDocument 
+  FolderOpened, Tools, Box, Grid, Warning, CopyDocument,
+  Bell, DataAnalysis, Promotion, Lock
 } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import request from '@/utils/request'
@@ -1021,11 +1036,25 @@ import MobileMenu from '@/components/MobileMenu.vue'
 
 const route = useRoute()
 const router = useRouter()
-const appId = computed(() => route.params.id)
+const appId = computed(() => route.params.id ? String(route.params.id) : '')
 
 const activeTab = ref('config') // 默认显示配置中心
 const mobileMenuOpen = ref(false) // 移动端菜单状态
 const currentPage = ref('overview')
+const workspaceMenu = ref('overview') // 工作台子菜单
+
+// 工作台菜单配置
+const workspaceMenuItems = [
+  { key: 'overview', label: '数据概览', icon: House },
+  { key: 'users', label: '用户管理', icon: User },
+  { key: 'messages', label: '消息推送', icon: Bell },
+  { key: 'storage', label: '存储服务', icon: FolderOpened },
+  { key: 'events', label: '数据埋点', icon: DataAnalysis },
+  { key: 'monitor', label: '监控告警', icon: Monitor },
+  { key: 'logs', label: '日志查询', icon: Document },
+  { key: 'versions', label: '版本管理', icon: Promotion },
+  { key: 'audit', label: '审计日志', icon: Lock }
+]
 const expandedGroups = ref(['user', 'message', 'data', 'system', 'storage'])
 const adminName = ref(localStorage.getItem('adminName') || 'Admin')
 
@@ -1219,9 +1248,18 @@ const handleMobileMenuClose = () => {
 // 移动端切换Tab
 const switchMobileTab = (tab) => {
   activeTab.value = tab
-  if (tab === 'workspace') {
-    mobileMenuOpen.value = false
-  }
+  // 不再自动关闭菜单，让用户选择子菜单
+}
+
+// 移动端切换工作台子菜单
+const switchWorkspaceMenu = (menu) => {
+  // 确保先切换到工作台Tab
+  activeTab.value = 'workspace'
+  // 延迟设置菜单，确保Workspace组件已渲染并接收到appId
+  setTimeout(() => {
+    workspaceMenu.value = menu
+  }, 100)
+  mobileMenuOpen.value = false
 }
 
 // 移动端切换页面
@@ -1283,11 +1321,12 @@ const getModulesInGroup = (groupKey) => {
 const fetchAppInfo = async () => {
   try {
     const res = await request.get(`/apps/${appId.value}`)
-    if (res.code === 0 && res.data) {
-      appInfo.value = res.data
-      basicConfig.value.name = res.data.name
-      basicConfig.value.description = res.data.description || ''
-      basicConfig.value.package_name = res.data.package_name || ''
+    // request.js已解包，res直接是数据对象
+    if (res) {
+      appInfo.value = res
+      basicConfig.value.name = res.name
+      basicConfig.value.description = res.description || ''
+      basicConfig.value.package_name = res.package_name || ''
     }
   } catch (error) {
     console.error('获取APP信息失败:', error)
@@ -1298,8 +1337,9 @@ const fetchAppInfo = async () => {
 const fetchAppModules = async () => {
   try {
     const res = await request.get(`/apps/${appId.value}/modules`)
-    if (res.code === 0 && res.data) {
-      appModules.value = res.data
+    // request.js已解包，res直接是数据数组
+    if (res) {
+      appModules.value = res
     }
   } catch (error) {
     console.error('获取APP模块失败:', error)
@@ -1376,8 +1416,9 @@ const getModuleConfigData = (moduleKey) => {
 const loadModuleConfig = async (moduleKey) => {
   try {
     const res = await request.get(`/apps/${appId.value}/modules/${moduleKey}/config`)
-    if (res.code === 0 && res.data && res.data.config) {
-      const config = typeof res.data.config === 'string' ? JSON.parse(res.data.config) : res.data.config
+    // request.js已解包，res直接是数据对象
+    if (res && res.config) {
+      const config = typeof res.config === 'string' ? JSON.parse(res.config) : res.config
       // 更新对应的配置对象
       const configMap = {
         'user_management': userConfig,
@@ -1469,8 +1510,9 @@ const loadConfigHistory = async (moduleKey) => {
   loadingHistory.value = true
   try {
     const res = await request.get(`/apps/${appId.value}/modules/${moduleKey}/config/history`)
-    if (res.code === 0 && res.data) {
-      configHistory.value = res.data
+    // request.js已解包，res直接是数据数组
+    if (res) {
+      configHistory.value = res
     }
   } catch (error) {
     console.error('加载历史记录失败:', error)
@@ -1964,10 +2006,19 @@ onMounted(() => {
 
   .content-area {
     width: 100% !important;
+    padding: 0 !important;
   }
 
   .page-content {
     padding: 16px !important;
+  }
+
+  .page-title {
+    font-size: 20px !important;
+  }
+
+  .page-desc {
+    font-size: 13px !important;
   }
 
   .stats-cards {
@@ -1980,17 +2031,79 @@ onMounted(() => {
   }
 
   .config-form {
-    padding: 16px !important;
+    padding: 12px !important;
+  }
+
+  /* 表单样式优化 */
+  :deep(.el-form) {
+    --el-form-label-font-size: 13px;
+  }
+
+  :deep(.el-form-item) {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    margin-bottom: 16px !important;
   }
 
   :deep(.el-form-item__label) {
     width: 100% !important;
     text-align: left !important;
-    margin-bottom: 8px;
+    margin-bottom: 8px !important;
+    padding-right: 0 !important;
+    line-height: 1.4 !important;
+    white-space: normal !important;
   }
 
   :deep(.el-form-item__content) {
+    width: 100% !important;
     margin-left: 0 !important;
+    flex-wrap: wrap !important;
+  }
+
+  /* 输入框全宽 */
+  :deep(.el-input),
+  :deep(.el-select),
+  :deep(.el-input-number) {
+    width: 100% !important;
+  }
+
+  :deep(.el-input-number) {
+    max-width: 150px !important;
+  }
+
+  /* 复选框组换行 */
+  :deep(.el-checkbox-group) {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+  }
+
+  /* 提示文字换行 */
+  .form-hint {
+    display: block !important;
+    margin-top: 4px !important;
+    margin-left: 0 !important;
+  }
+
+  /* 表单分区标题 */
+  .form-section h4 {
+    font-size: 15px !important;
+  }
+
+  /* 按钮组 */
+  :deep(.el-form-item:last-child .el-form-item__content) {
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+
+  :deep(.el-button) {
+    margin-left: 0 !important;
+  }
+
+  /* 时间选择器 */
+  :deep(.el-time-picker) {
+    width: 100% !important;
+    margin-bottom: 8px !important;
   }
 }
 
@@ -2000,7 +2113,20 @@ onMounted(() => {
   }
 
   .page-title {
-    font-size: 20px !important;
+    font-size: 18px !important;
+  }
+
+  .page-desc {
+    font-size: 12px !important;
+  }
+
+  /* 更小屏幕的表单优化 */
+  .config-form {
+    padding: 8px !important;
+  }
+
+  :deep(.el-form-item__label) {
+    font-size: 13px !important;
   }
 }
 </style>

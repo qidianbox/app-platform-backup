@@ -1,17 +1,28 @@
 import axios from 'axios'
 import { ElMessage, ElNotification } from 'element-plus'
 import { ErrorCodes, getErrorMessage, isAuthError, isRetryableError, isRateLimitError } from './errorCodes'
+import errorCollector from './errorCollector'
 
 // 根据环境自动选择API地址
 const getBaseURL = () => {
+  const hostname = window.location.hostname
+  const origin = window.location.origin
+  
   // 如果是通过代理访问（开发模式），使用相对路径
-  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+  if (hostname === 'localhost' || hostname === '127.0.0.1') {
     return '/api/v1'
   }
-  // 生产环境或通过公网访问时，使用绝对路径
-  // 将前端域名中的5173或5174替换为8080
-  const apiHost = window.location.origin.replace(/517[34]/, '8080')
-  return `${apiHost}/api/v1`
+  
+  // Manus沙箱环境：将5173端口替换为8080端口
+  // 格式: https://5173-xxx.manus.computer -> https://8080-xxx.manus.computer
+  if (hostname.includes('.manus.computer')) {
+    const apiHost = origin.replace(/5173-/, '8080-').replace(/5174-/, '8080-')
+    return `${apiHost}/api/v1`
+  }
+  
+  // 其他生产环境，假设API和前端同域或使用环境变量
+  const apiBaseUrl = window.__API_BASE_URL__ || origin.replace(/:\d+$/, ':8080')
+  return `${apiBaseUrl}/api/v1`
 }
 
 // 重试配置
@@ -311,6 +322,9 @@ request.interceptors.response.use(
     }
     
     const errorLog = systemLogger.logApiError(error)
+    
+    // 发送到错误收集器
+    errorCollector.collectApiError(error)
     
     // 详细的错误处理
     let errorMessage = '请求失败'

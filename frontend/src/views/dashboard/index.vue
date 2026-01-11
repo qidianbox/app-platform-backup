@@ -123,12 +123,11 @@ const loadStats = async () => {
       url: '/stats',
       method: 'get'
     })
-    if (res.code === 0) {
-      stats.value.totalApps = res.data.app_count || 0
-      stats.value.totalUsers = res.data.user_count || 0
-      stats.value.todayNew = res.data.today_new_apps || 0
-      stats.value.activeApps = res.data.active_apps || 0
-    }
+    // request.js已解包，res直接是数据对象
+    stats.value.totalApps = res.app_count || 0
+    stats.value.totalUsers = res.user_count || 0
+    stats.value.todayNew = res.today_new_apps || 0
+    stats.value.activeApps = res.active_apps || 0
   } catch (error) {
     console.error('Failed to load stats:', error)
   }

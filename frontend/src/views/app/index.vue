@@ -278,8 +278,12 @@ const fetchAppList = async () => {
   loading.value = true
   try {
     const res = await getAppList()
-    appList.value = res.data.list || []
+    // request.js的响应拦截器已经解包，返回的是data字段
+    // 所以res就是 { list: [...], total: 2, page: 1, size: 10 }
+    appList.value = res.list || res.data?.list || []
+    console.log('[APP] Fetched app list:', appList.value.length, 'apps')
   } catch (error) {
+    console.error('[APP] Failed to fetch app list:', error)
     ElMessage.error('获取APP列表失败')
   } finally {
     loading.value = false

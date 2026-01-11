@@ -13,6 +13,7 @@ import (
 	"app-platform-backend/internal/api/v1/app"
 	moduleapi "app-platform-backend/internal/api/v1/module"
 	statsapi "app-platform-backend/internal/api/v1/stats"
+	"app-platform-backend/internal/api/v1/system"
 	"app-platform-backend/internal/config"
 	"app-platform-backend/internal/middleware"
 	"app-platform-backend/internal/pkg/database"
@@ -80,9 +81,12 @@ func main() {
 	// ========================================
 	v1 := r.Group("/api/v1")
 	{
-		// 公开接口（无需认证）
-		// 登录接口使用更严格的限流 (10 QPS/IP, 1分钟窗口)
-		v1.POST("/admin/login", middleware.APIRateLimitMiddleware(10, time.Minute), admin.Login)
+// 公开接口（无需认证）
+			// 登录接口使用更严格的限流 (10 QPS/IP, 1分钟窗口)
+			v1.POST("/admin/login", middleware.APIRateLimitMiddleware(10, time.Minute), admin.Login)
+			
+			// 错误报告接口（允许未认证请求，用于收集前端错误）
+			v1.POST("/system/error-report", system.ErrorReportHandler)
 
 		// 需要认证的接口
 		auth := v1.Group("")

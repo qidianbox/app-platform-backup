@@ -1002,8 +1002,18 @@ import {
 } from '@/api/app'
 
 const props = defineProps({
-  appId: String,
-  appInfo: Object
+  appId: {
+    type: String,
+    default: ''
+  },
+  appInfo: {
+    type: Object,
+    default: () => ({})
+  },
+  initialMenu: {
+    type: String,
+    default: 'overview'
+  }
 })
 
 // 菜单配置
@@ -1019,7 +1029,7 @@ const menuItems = [
   { key: 'audit', label: '审计日志', icon: Lock }
 ]
 
-const currentMenu = ref('overview')
+const currentMenu = ref(props.initialMenu || 'overview')
 const chartPeriod = ref('7d')
 
 // 统计数据
@@ -1212,14 +1222,10 @@ const fetchUserList = async () => {
       search: userSearch.value
     })
     console.log('[UserManagement] API response:', res)
-    if (res.code === 0) {
-      userList.value = res.data?.list || []
-      userTotal.value = res.data?.total || 0
-      console.log('[UserManagement] Loaded', userList.value.length, 'users, total:', userTotal.value)
-    } else {
-      console.error('[UserManagement] API returned error code:', res.code, res.message)
-      ElMessage.error(res.message || '获取用户列表失败')
-    }
+    // request.js已解包，res直接是数据对象
+    userList.value = res.list || []
+    userTotal.value = res.total || 0
+    console.log('[UserManagement] Loaded', userList.value.length, 'users, total:', userTotal.value)
   } catch (error) {
     console.error('[UserManagement] Failed to fetch user list:', error)
     console.error('[UserManagement] Error details:', {
@@ -1243,11 +1249,10 @@ const toggleUserStatus = async (row) => {
       cancelButtonText: '取消',
       type: 'warning'
     })
-    const res = await updateUserStatus(row.id, newStatus)
-    if (res.code === 0) {
-      ElMessage.success(`${action}成功`)
-      fetchUserList()
-    }
+    await updateUserStatus(row.id, newStatus)
+    // request.js已解包，成功时不会抛出异常
+    ElMessage.success(`${action}成功`)
+    fetchUserList()
   } catch (error) {
     if (error !== 'cancel') {
       console.error('更新用户状态失败:', error)
@@ -1257,13 +1262,12 @@ const toggleUserStatus = async (row) => {
 
 // 获取用户统计
 const fetchUserStats = async () => {
-  if (!props.appId) return
+  if (!props.appId || props.appId === '') return
   try {
     const res = await getUserStats(props.appId)
-    if (res.code === 0) {
-      stats.value.userCount = res.data.total || 0
-      stats.value.activeUsers = res.data.active || 0
-    }
+    // request.js已解包，res直接是数据对象
+    stats.value.userCount = res.total || 0
+    stats.value.activeUsers = res.active || 0
   } catch (error) {
     console.error('获取用户统计失败:', error)
   }
@@ -1271,7 +1275,7 @@ const fetchUserStats = async () => {
 
 // 获取日志列表
 const fetchLogList = async () => {
-  if (!props.appId) return
+  if (!props.appId || props.appId === '') return
   logLoading.value = true
   try {
     const params = {
@@ -1287,10 +1291,9 @@ const fetchLogList = async () => {
     }
     
     const res = await getLogList(params)
-    if (res.code === 0) {
-      logList.value = res.data.list || []
-      logTotal.value = res.data.total || 0
-    }
+    // request.js已解包，res直接是数据对象
+    logList.value = res.list || []
+    logTotal.value = res.total || 0
   } catch (error) {
     console.error('获取日志列表失败:', error)
   } finally {
@@ -1300,13 +1303,12 @@ const fetchLogList = async () => {
 
 // 获取日志统计
 const fetchLogStats = async () => {
-  if (!props.appId) return
+  if (!props.appId || props.appId === '') return
   try {
     const res = await getLogStats(props.appId)
-    if (res.code === 0) {
-      logStats.value = res.data || {}
-      stats.value.todayErrors = res.data.error_count || 0
-    }
+    // request.js已解包，res直接是数据对象
+    logStats.value = res || {}
+    stats.value.todayErrors = res.error_count || 0
   } catch (error) {
     console.error('获取日志统计失败:', error)
   }
@@ -1314,7 +1316,7 @@ const fetchLogStats = async () => {
 
 // 导出日志
 const exportLogs = async () => {
-  if (!props.appId) return
+  if (!props.appId || props.appId === '') return
   try {
     const params = {
       app_id: props.appId,
@@ -1325,10 +1327,9 @@ const exportLogs = async () => {
       params.end_time = logDateRange.value[1]
     }
     const res = await exportLogsApi(params)
-    if (res.code === 0) {
-      ElMessage.success(`导出成功，共${res.data.count}条日志`)
-      // 实际项目中这里应该下载文件
-    }
+    // request.js已解包，res直接是数据对象
+    ElMessage.success(`导出成功，共${res.count || 0}条日志`)
+    // 实际项目中这里应该下载文件
   } catch (error) {
     console.error('导出日志失败:', error)
   }
@@ -1336,17 +1337,16 @@ const exportLogs = async () => {
 
 // 获取消息列表
 const fetchMessageList = async () => {
-  if (!props.appId) return
+  if (!props.appId || props.appId === '') return
   messageLoading.value = true
   try {
-    const res = await getMessageList({
+const res = await getMessageList({
       app_id: props.appId,
       page: 1,
-      size: 20
+      size: 50
     })
-    if (res.code === 0) {
-      messageHistory.value = res.data.list || []
-    }
+    // request.js已解包，res直接是数据对象
+    messageHistory.value = res.list || []
   } catch (error) {
     console.error('获取消息列表失败:', error)
   } finally {
@@ -1387,11 +1387,10 @@ const sendMessageNow = async () => {
       })
     }
     
-    if (res.code === 0) {
-      ElMessage.success('消息推送成功')
-      messageForm.value = { type: 'all', userIds: '', title: '', content: '' }
-      fetchMessageList()
-    }
+    // request.js已解包，成功时不会抛出异常
+    ElMessage.success('消息推送成功')
+    messageForm.value = { type: 'all', userIds: '', title: '', content: '' }
+    fetchMessageList()
   } catch (error) {
     console.error('发送消息失败:', error)
   } finally {
@@ -1401,7 +1400,7 @@ const sendMessageNow = async () => {
 
 // 获取版本列表
 const fetchVersionList = async () => {
-  if (!props.appId) return
+  if (!props.appId || props.appId === '') return
   versionLoading.value = true
   try {
     const params = {
@@ -1413,10 +1412,9 @@ const fetchVersionList = async () => {
     if (versionStatus.value) params.status = versionStatus.value
     
     const res = await getVersionList(params)
-    if (res.code === 0) {
-      versionList.value = res.data.list || res.data || []
-      versionTotal.value = res.data.total || versionList.value.length
-    }
+    // request.js已解包，res直接是数据对象
+    versionList.value = res.list || []
+    versionTotal.value = res.total || versionList.value.length
   } catch (error) {
     console.error('获取版本列表失败:', error)
   } finally {
@@ -1451,22 +1449,21 @@ const submitVersion = async () => {
       ...versionForm.value
     }
     
-    const res = await createVersion(data)
-    if (res.code === 0) {
-      ElMessage.success(editingVersion.value ? '版本更新成功' : '版本发布成功')
-      showVersionDialog.value = false
-      editingVersion.value = null
-      versionForm.value = {
-        version: '',
-        platform: 'android',
-        download_url: '',
-        description: '',
-        force_update: false,
-        gray_release: false,
-        gray_percent: 10
-      }
-      fetchVersionList()
+    await createVersion(data)
+    // request.js已解包，成功时不会抛出异常
+    ElMessage.success(editingVersion.value ? '版本更新成功' : '版本发布成功')
+    showVersionDialog.value = false
+    editingVersion.value = null
+    versionForm.value = {
+      version: '',
+      platform: 'android',
+      download_url: '',
+      description: '',
+      force_update: false,
+      gray_release: false,
+      gray_percent: 10
     }
+    fetchVersionList()
   } catch (error) {
     console.error('提交版本失败:', error)
   } finally {
@@ -1482,11 +1479,10 @@ const publishVersionAction = async (row) => {
       cancelButtonText: '取消',
       type: 'warning'
     })
-    const res = await publishVersion(row.id)
-    if (res.code === 0) {
-      ElMessage.success('版本发布成功')
-      fetchVersionList()
-    }
+    await publishVersion(row.id)
+    // request.js已解包，成功时不会抛出异常
+    ElMessage.success('版本发布成功')
+    fetchVersionList()
   } catch (error) {
     if (error !== 'cancel') {
       console.error('发布版本失败:', error)
@@ -1502,11 +1498,10 @@ const offlineVersionAction = async (row) => {
       cancelButtonText: '取消',
       type: 'warning'
     })
-    const res = await offlineVersion(row.id)
-    if (res.code === 0) {
-      ElMessage.success('版本已下线')
-      fetchVersionList()
-    }
+    await offlineVersion(row.id)
+    // request.js已解包，成功时不会抛出异常
+    ElMessage.success('版本已下线')
+    fetchVersionList()
   } catch (error) {
     if (error !== 'cancel') {
       console.error('下线版本失败:', error)
@@ -1536,7 +1531,7 @@ const getFileTypeLabel = (mimeType) => {
 
 // 获取文件列表
 const fetchFileList = async () => {
-  if (!props.appId) return
+  if (!props.appId || props.appId === '') return
   fileLoading.value = true
   try {
     const params = {
@@ -1548,10 +1543,9 @@ const fetchFileList = async () => {
     if (fileType.value) params.type = fileType.value
     
     const res = await getFileList(params)
-    if (res.code === 0) {
-      fileList.value = res.data.list || []
-      fileTotal.value = res.data.total || 0
-    }
+    // request.js已解包，res直接是数据对象
+    fileList.value = res.list || []
+    fileTotal.value = res.total || 0
   } catch (error) {
     console.error('获取文件列表失败:', error)
   } finally {
@@ -1561,12 +1555,11 @@ const fetchFileList = async () => {
 
 // 获取文件统计
 const fetchFileStats = async () => {
-  if (!props.appId) return
+  if (!props.appId || props.appId === '') return
   try {
     const res = await getFileStats({ app_id: props.appId })
-    if (res.code === 0) {
-      fileStats.value = res.data || { total_count: 0, total_size: 0, today_count: 0 }
-    }
+    // request.js已解包，res直接是数据对象
+    fileStats.value = res || { total_count: 0, total_size: 0, today_count: 0 }
   } catch (error) {
     console.error('获取文件统计失败:', error)
   }
@@ -1597,8 +1590,9 @@ const handleUploadError = () => {
 const downloadFileAction = async (row) => {
   try {
     const res = await downloadFile(row.id)
-    if (res.code === 0 && res.data.url) {
-      window.open(res.data.url, '_blank')
+    // request.js已解包，res直接是数据对象
+    if (res && res.url) {
+      window.open(res.url, '_blank')
     }
   } catch (error) {
     console.error('下载文件失败:', error)
@@ -1613,12 +1607,11 @@ const deleteFileAction = async (row) => {
       cancelButtonText: '取消',
       type: 'warning'
     })
-    const res = await deleteFile(row.id)
-    if (res.code === 0) {
-      ElMessage.success('文件删除成功')
-      fetchFileList()
-      fetchFileStats()
-    }
+    await deleteFile(row.id)
+    // request.js已解包，成功时不会抛出异常
+    ElMessage.success('文件删除成功')
+    fetchFileList()
+    fetchFileStats()
   } catch (error) {
     if (error !== 'cancel') {
       console.error('删除文件失败:', error)
@@ -1636,13 +1629,12 @@ const batchDeleteFilesAction = async () => {
       type: 'warning'
     })
     const ids = selectedFiles.value.map(f => f.id)
-    const res = await batchDeleteFiles({ ids })
-    if (res.code === 0) {
-      ElMessage.success('文件删除成功')
-      selectedFiles.value = []
-      fetchFileList()
-      fetchFileStats()
-    }
+    await batchDeleteFiles({ ids })
+    // request.js已解包，成功时不会抛出异常
+    ElMessage.success('文件删除成功')
+    selectedFiles.value = []
+    fetchFileList()
+    fetchFileStats()
   } catch (error) {
     if (error !== 'cancel') {
       console.error('批量删除文件失败:', error)
@@ -1654,7 +1646,7 @@ const batchDeleteFilesAction = async () => {
 
 // 获取事件列表
 const fetchEventList = async () => {
-  if (!props.appId) return
+  if (!props.appId || props.appId === '') return
   eventLoading.value = true
   try {
     const params = {
@@ -1669,10 +1661,9 @@ const fetchEventList = async () => {
     if (eventName.value) params.event_name = eventName.value
     
     const res = await getEventList(params)
-    if (res.code === 0) {
-      eventList.value = res.data.list || []
-      eventTotal.value = res.data.total || 0
-    }
+    // request.js已解包，res直接是数据对象
+    eventList.value = res.list || []
+    eventTotal.value = res.total || 0
   } catch (error) {
     console.error('获取事件列表失败:', error)
   } finally {
@@ -1682,12 +1673,11 @@ const fetchEventList = async () => {
 
 // 获取事件统计
 const fetchEventStats = async () => {
-  if (!props.appId) return
+  if (!props.appId || props.appId === '') return
   try {
     const res = await getEventStats({ app_id: props.appId })
-    if (res.code === 0) {
-      eventStats.value = res.data || { total_events: 0, today_events: 0, unique_users: 0 }
-    }
+    // request.js已解包，res直接是数据对象
+    eventStats.value = res || { total_events: 0, today_events: 0, unique_users: 0 }
   } catch (error) {
     console.error('获取事件统计失败:', error)
   }
@@ -1709,9 +1699,8 @@ const analyzeFunnel = async () => {
       app_id: props.appId,
       steps: funnelSteps.value
     })
-    if (res.code === 0) {
-      initFunnelChart(res.data)
-    }
+    // request.js已解包，res直接是数据对象
+    initFunnelChart(res)
   } catch (error) {
     console.error('漏斗分析失败:', error)
   }
@@ -1743,13 +1732,12 @@ const initFunnelChart = (data) => {
 
 // 获取事件定义列表
 const fetchEventDefinitions = async () => {
-  if (!props.appId) return
+  if (!props.appId || props.appId === '') return
   eventDefLoading.value = true
   try {
     const res = await getEventDefinitions({ app_id: props.appId })
-    if (res.code === 0) {
-      eventDefinitions.value = res.data || []
-    }
+    // request.js已解包，res直接是数据数组
+    eventDefinitions.value = res || []
   } catch (error) {
     console.error('获取事件定义失败:', error)
   } finally {
@@ -1765,11 +1753,10 @@ const deleteEventDefAction = async (row) => {
       cancelButtonText: '取消',
       type: 'warning'
     })
-    const res = await deleteEventDefinition(row.id)
-    if (res.code === 0) {
-      ElMessage.success('删除成功')
-      fetchEventDefinitions()
-    }
+    await deleteEventDefinition(row.id)
+    // request.js已解包，成功时不会抛出异常
+    ElMessage.success('删除成功')
+    fetchEventDefinitions()
   } catch (error) {
     if (error !== 'cancel') {
       console.error('删除事件定义失败:', error)
@@ -1781,12 +1768,11 @@ const deleteEventDefAction = async (row) => {
 
 // 获取监控统计
 const fetchMonitorStats = async () => {
-  if (!props.appId) return
+  if (!props.appId || props.appId === '') return
   try {
     const res = await getMonitorStats({ app_id: props.appId })
-    if (res.code === 0) {
-      monitorStats.value = res.data || { cpu_usage: 0, memory_usage: 0, active_alerts: 0 }
-    }
+    // request.js已解包，res直接是数据对象
+    monitorStats.value = res || { cpu_usage: 0, memory_usage: 0, active_alerts: 0 }
   } catch (error) {
     console.error('获取监控统计失败:', error)
   }
@@ -1794,12 +1780,11 @@ const fetchMonitorStats = async () => {
 
 // 获取健康检查
 const fetchHealthCheck = async () => {
-  if (!props.appId) return
+  if (!props.appId || props.appId === '') return
   try {
     const res = await getHealthCheck({ app_id: props.appId })
-    if (res.code === 0) {
-      healthStatus.value = res.data.status || 'healthy'
-    }
+    // request.js已解包，res直接是数据对象
+    healthStatus.value = res.status || 'healthy'
   } catch (error) {
     healthStatus.value = 'unhealthy'
     console.error('健康检查失败:', error)
@@ -1808,15 +1793,14 @@ const fetchHealthCheck = async () => {
 
 // 获取监控指标
 const fetchMonitorMetrics = async () => {
-  if (!props.appId) return
+  if (!props.appId || props.appId === '') return
   try {
     const res = await getMonitorMetrics({
       app_id: props.appId,
       period: monitorPeriod.value
     })
-    if (res.code === 0) {
-      initMonitorCharts(res.data)
-    }
+    // request.js已解包，res直接是数据对象
+    initMonitorCharts(res)
   } catch (error) {
     console.error('获取监控指标失败:', error)
   }
@@ -1864,16 +1848,15 @@ const initMonitorCharts = (data) => {
 
 // 获取告警列表
 const fetchAlertList = async () => {
-  if (!props.appId) return
+  if (!props.appId || props.appId === '') return
   alertLoading.value = true
   try {
     const params = { app_id: props.appId }
     if (alertStatus.value !== '') params.status = parseInt(alertStatus.value)
     
     const res = await getAlertList(params)
-    if (res.code === 0) {
-      alertList.value = res.data || []
-    }
+    // request.js已解包，res直接是数据数组
+    alertList.value = res || []
   } catch (error) {
     console.error('获取告警列表失败:', error)
   } finally {
@@ -1884,12 +1867,11 @@ const fetchAlertList = async () => {
 // 处理告警
 const resolveAlert = async (row) => {
   try {
-    const res = await updateAlert(row.id, { status: 1 })
-    if (res.code === 0) {
-      ElMessage.success('告警已处理')
-      fetchAlertList()
-      fetchMonitorStats()
-    }
+    await updateAlert(row.id, { status: 1 })
+    // request.js已解包，成功时不会抛出异常
+    ElMessage.success('告警已处理')
+    fetchAlertList()
+    fetchMonitorStats()
   } catch (error) {
     console.error('处理告警失败:', error)
   }
@@ -1898,10 +1880,9 @@ const resolveAlert = async (row) => {
 // 切换告警规则状态
 const toggleAlertRule = async (row) => {
   try {
-    const res = await updateAlert(row.id, { status: row.status })
-    if (res.code === 0) {
-      ElMessage.success(row.status === 1 ? '规则已启用' : '规则已禁用')
-    }
+    await updateAlert(row.id, { status: row.status })
+    // request.js已解包，成功时不会抛出异常
+    ElMessage.success(row.status === 1 ? '规则已启用' : '规则已禁用')
   } catch (error) {
     console.error('更新告警规则失败:', error)
   }
@@ -1915,11 +1896,10 @@ const deleteAlertRule = async (row) => {
       cancelButtonText: '取消',
       type: 'warning'
     })
-    const res = await deleteAlert(row.id)
-    if (res.code === 0) {
-      ElMessage.success('删除成功')
-      fetchAlertRules()
-    }
+    await deleteAlert(row.id)
+    // request.js已解包，成功时不会抛出异常
+    ElMessage.success('删除成功')
+    fetchAlertRules()
   } catch (error) {
     if (error !== 'cancel') {
       console.error('删除告警规则失败:', error)
@@ -1929,13 +1909,12 @@ const deleteAlertRule = async (row) => {
 
 // 获取告警规则列表
 const fetchAlertRules = async () => {
-  if (!props.appId) return
+  if (!props.appId || props.appId === '') return
   alertRuleLoading.value = true
   try {
     const res = await getAlertList({ app_id: props.appId, type: 'rule' })
-    if (res.code === 0) {
-      alertRules.value = res.data || []
-    }
+    // request.js已解包，res直接是数据数组
+    alertRules.value = res || []
   } catch (error) {
     console.error('获取告警规则失败:', error)
   } finally {
@@ -1945,7 +1924,7 @@ const fetchAlertRules = async () => {
 
 // 审计日志相关函数
 const fetchAuditLogs = async () => {
-  if (!props.appId) return
+  if (!props.appId || props.appId === '') return
   auditLoading.value = true
   try {
     const params = {
@@ -1961,10 +1940,9 @@ const fetchAuditLogs = async () => {
       params.end_time = formatDateForApi(auditSearch.value.dateRange[1])
     }
     const res = await getAuditLogs(params)
-    if (res.code === 0) {
-      auditLogs.value = res.data.list || []
-      auditTotal.value = res.data.total || 0
-    }
+    // request.js已解包，res直接是数据对象
+    auditLogs.value = res.list || []
+    auditTotal.value = res.total || 0
   } catch (error) {
     console.error('获取审计日志失败:', error)
   } finally {
@@ -1973,12 +1951,11 @@ const fetchAuditLogs = async () => {
 }
 
 const fetchAuditStats = async () => {
-  if (!props.appId) return
+  if (!props.appId || props.appId === '') return
   try {
     const res = await getAuditStats({ app_id: props.appId, days: 7 })
-    if (res.code === 0) {
-      auditStats.value = res.data || {}
-    }
+    // request.js已解包，res直接是数据对象
+    auditStats.value = res || {}
   } catch (error) {
     console.error('获取审计统计失败:', error)
   }
@@ -2121,7 +2098,7 @@ const realtimeAlerts = ref([])
 
 // 初始化WebSocket连接
 const initWebSocket = () => {
-  if (!props.appId) return
+  if (!props.appId || props.appId === '') return
   
   // 请求通知权限
   wsClient.constructor.requestNotificationPermission()
@@ -2211,8 +2188,11 @@ const disconnectWebSocket = () => {
 
 onMounted(() => {
   setTimeout(initCharts, 100)
-  loadData()
-  initWebSocket()
+  // 只有当appId有效时才加载数据
+  if (props.appId && props.appId !== '') {
+    loadData()
+    initWebSocket()
+  }
 })
 
 onUnmounted(() => {
@@ -2220,6 +2200,12 @@ onUnmounted(() => {
 })
 
 watch(currentMenu, (val) => {
+  // 确保appId有效时才加载数据
+  if (!props.appId || props.appId === '') {
+    console.log('currentMenu changed but appId is empty, skipping data load')
+    return
+  }
+  
   if (val === 'overview') {
     setTimeout(initCharts, 100)
     loadData()
@@ -2251,7 +2237,9 @@ watch(currentMenu, (val) => {
   }
 })
 
-watch(() => props.appId, () => {
+watch(() => props.appId, (newVal) => {
+  // 确保appId有效时才加载数据
+  if (!newVal || newVal === '') return
   loadData()
   if (currentMenu.value === 'users') fetchUserList()
   if (currentMenu.value === 'logs') fetchLogList()
@@ -2260,7 +2248,15 @@ watch(() => props.appId, () => {
   if (currentMenu.value === 'storage') { fetchFileList(); fetchFileStats() }
   if (currentMenu.value === 'events') { fetchEventList(); fetchEventStats() }
   if (currentMenu.value === 'monitor') { fetchMonitorStats(); fetchHealthCheck(); fetchMonitorMetrics() }
-})
+}, { immediate: true })
+
+// 监听父组件传入的initialMenu变化（移动端菜单切换）
+watch(() => props.initialMenu, (newVal) => {
+  if (newVal && newVal !== currentMenu.value) {
+    currentMenu.value = newVal
+    // 如果appId有效，触发数据加载（watch currentMenu会自动处理）
+  }
+}, { immediate: true })
 </script>
 
 <style lang="scss" scoped>
@@ -2649,12 +2645,11 @@ watch(() => props.appId, () => {
   }
   
   .workspace-sidebar {
-    width: 100%;
-    display: flex;
-    overflow-x: auto;
-    padding: 0;
-    border-right: none;
-    border-bottom: 1px solid #e4e7ed;
+    display: none; /* 移动端隐藏侧边栏，使用汉堡菜单代替 */
+  }
+  
+  .workspace-content {
+    padding: 16px;
   }
   
   .menu-item {

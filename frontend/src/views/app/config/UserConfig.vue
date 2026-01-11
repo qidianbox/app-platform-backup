@@ -404,8 +404,9 @@ const fetchConfig = async () => {
   loading.value = true
   try {
     const res = await getModuleConfig(props.appId, 'user')
-    if (res.data && res.data.config) {
-      Object.assign(formData, res.data.config)
+    // request.js已解包，res直接是数据对象
+    if (res && res.config) {
+      Object.assign(formData, res.config)
     }
   } catch (error) {
     ElMessage.error('获取配置失败')
@@ -508,31 +509,46 @@ onMounted(() => {
       }
     }
 
+    :deep(.el-form) {
+      --el-form-label-font-size: 13px;
+    }
+
+    :deep(.el-form-item) {
+      flex-direction: column !important;
+      align-items: flex-start !important;
+      margin-bottom: 16px !important;
+    }
+
     :deep(.el-form-item__label) {
       width: 100% !important;
-      text-align: left;
-      margin-bottom: 8px;
-      padding-right: 0;
+      text-align: left !important;
+      margin-bottom: 8px !important;
+      padding-right: 0 !important;
+      line-height: 1.4 !important;
+      white-space: normal !important;
     }
 
     :deep(.el-form-item__content) {
+      width: 100% !important;
       margin-left: 0 !important;
-      flex-wrap: wrap;
+      flex-wrap: wrap !important;
     }
 
     :deep(.el-checkbox-group) {
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 8px !important;
+      
       .el-checkbox {
-        display: block;
-        margin-bottom: 10px;
-        margin-right: 0;
+        margin-right: 0 !important;
       }
     }
 
     .form-tip {
-      display: block;
-      width: 100%;
-      margin-top: 4px;
-      margin-left: 0;
+      display: block !important;
+      width: 100% !important;
+      margin-top: 4px !important;
+      margin-left: 0 !important;
       font-size: 11px;
       line-height: 1.4;
     }
@@ -544,10 +560,32 @@ onMounted(() => {
 
     :deep(.el-input-number) {
       width: 100% !important;
+      max-width: 150px !important;
     }
 
     :deep(.el-divider__text) {
       font-size: 13px;
+    }
+
+    :deep(.el-button) {
+      margin-left: 0 !important;
+      margin-bottom: 8px !important;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .module-config-container {
+    padding: 8px;
+
+    .config-header {
+      h2 {
+        font-size: 16px;
+      }
+    }
+
+    :deep(.el-form-item__label) {
+      font-size: 13px !important;
     }
   }
 }

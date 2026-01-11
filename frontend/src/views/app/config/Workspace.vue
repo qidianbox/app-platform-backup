@@ -972,6 +972,87 @@
         </el-button>
       </template>
     </el-dialog>
+
+    <!-- 新建事件定义对话框 -->
+    <el-dialog v-model="showEventDefDialog" title="新建事件定义" width="600px">
+      <el-form :model="eventDefForm" label-width="100px" :rules="eventDefRules" ref="eventDefFormRef">
+        <el-form-item label="事件名称" prop="name">
+          <el-input v-model="eventDefForm.name" placeholder="请输入事件名称，如：用户登录" />
+        </el-form-item>
+        <el-form-item label="事件编码" prop="code">
+          <el-input v-model="eventDefForm.code" placeholder="请输入事件编码，如：user_login" />
+        </el-form-item>
+        <el-form-item label="事件描述" prop="description">
+          <el-input v-model="eventDefForm.description" type="textarea" :rows="3" placeholder="请输入事件描述" />
+        </el-form-item>
+        <el-form-item label="事件属性">
+          <div class="property-list">
+            <div v-for="(prop, index) in eventDefForm.properties" :key="index" class="property-item">
+              <el-input v-model="eventDefForm.properties[index]" placeholder="属性名称" style="width: 200px" />
+              <el-button type="danger" :icon="Delete" circle size="small" @click="eventDefForm.properties.splice(index, 1)" />
+            </div>
+            <el-button type="primary" link @click="eventDefForm.properties.push('')">+ 添加属性</el-button>
+          </div>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="showEventDefDialog = false">取消</el-button>
+        <el-button type="primary" @click="submitEventDef" :loading="eventDefSubmitting">创建</el-button>
+      </template>
+    </el-dialog>
+
+    <!-- 新建告警规则对话框 -->
+    <el-dialog v-model="showAlertRuleDialog" title="新建告警规则" width="600px">
+      <el-form :model="alertRuleForm" label-width="100px" :rules="alertRuleRules" ref="alertRuleFormRef">
+        <el-form-item label="规则名称" prop="name">
+          <el-input v-model="alertRuleForm.name" placeholder="请输入规则名称" />
+        </el-form-item>
+        <el-form-item label="监控指标" prop="metric_name">
+          <el-select v-model="alertRuleForm.metric_name" placeholder="请选择监控指标" style="width: 100%">
+            <el-option label="CPU使用率" value="cpu_usage" />
+            <el-option label="内存使用率" value="memory_usage" />
+            <el-option label="请求延迟" value="request_latency" />
+            <el-option label="错误率" value="error_rate" />
+            <el-option label="QPS" value="qps" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="触发条件" prop="condition_type">
+          <el-select v-model="alertRuleForm.condition_type" placeholder="请选择条件" style="width: 120px">
+            <el-option label="大于" value="gt" />
+            <el-option label="小于" value="lt" />
+            <el-option label="等于" value="eq" />
+            <el-option label="大于等于" value="gte" />
+            <el-option label="小于等于" value="lte" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="阈值" prop="threshold">
+          <el-input-number v-model="alertRuleForm.threshold" :min="0" :max="100" placeholder="请输入阈值" />
+          <span style="margin-left: 8px; color: #909399;">{{ alertRuleForm.metric_name?.includes('rate') || alertRuleForm.metric_name?.includes('usage') ? '%' : '' }}</span>
+        </el-form-item>
+        <el-form-item label="持续时间" prop="duration">
+          <el-input-number v-model="alertRuleForm.duration" :min="0" :max="3600" placeholder="持续时间" />
+          <span style="margin-left: 8px; color: #909399;">秒</span>
+        </el-form-item>
+        <el-form-item label="告警级别" prop="level">
+          <el-radio-group v-model="alertRuleForm.level">
+            <el-radio label="info">提示</el-radio>
+            <el-radio label="warning">警告</el-radio>
+            <el-radio label="critical">严重</el-radio>
+          </el-radio-group>
+        </el-form-item>
+        <el-form-item label="通知方式">
+          <el-checkbox-group v-model="alertRuleForm.notify_channels">
+            <el-checkbox label="email">邮件</el-checkbox>
+            <el-checkbox label="sms">短信</el-checkbox>
+            <el-checkbox label="webhook">Webhook</el-checkbox>
+          </el-checkbox-group>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="showAlertRuleDialog = false">取消</el-button>
+        <el-button type="primary" @click="submitAlertRule" :loading="alertRuleSubmitting">创建</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -1170,6 +1251,37 @@ const auditSearch = ref({
   dateRange: null
 })
 const showAlertRuleDialog = ref(false)
+const alertRuleForm = ref({
+  name: '',
+  metric_name: '',
+  condition_type: 'gt',
+  threshold: 80,
+  duration: 60,
+  level: 'warning',
+  notify_channels: []
+})
+const alertRuleRules = {
+  name: [{ required: true, message: '请输入规则名称', trigger: 'blur' }],
+  metric_name: [{ required: true, message: '请选择监控指标', trigger: 'change' }],
+  condition_type: [{ required: true, message: '请选择触发条件', trigger: 'change' }],
+  threshold: [{ required: true, message: '请输入阈值', trigger: 'blur' }]
+}
+const alertRuleFormRef = ref(null)
+const alertRuleSubmitting = ref(false)
+
+// 事件定义表单
+const eventDefForm = ref({
+  name: '',
+  code: '',
+  description: '',
+  properties: []
+})
+const eventDefRules = {
+  name: [{ required: true, message: '请输入事件名称', trigger: 'blur' }],
+  code: [{ required: true, message: '请输入事件编码', trigger: 'blur' }]
+}
+const eventDefFormRef = ref(null)
+const eventDefSubmitting = ref(false)
 
 // 格式化日期
 const formatDate = (dateStr) => {
@@ -1919,6 +2031,71 @@ const fetchAlertRules = async () => {
     console.error('获取告警规则失败:', error)
   } finally {
     alertRuleLoading.value = false
+  }
+}
+
+// 提交告警规则
+const submitAlertRule = async () => {
+  if (!alertRuleFormRef.value) return
+  try {
+    await alertRuleFormRef.value.validate()
+    alertRuleSubmitting.value = true
+    await createAlert({
+      app_id: props.appId,
+      type: 'rule',
+      ...alertRuleForm.value
+    })
+    ElMessage.success('告警规则创建成功')
+    showAlertRuleDialog.value = false
+    // 重置表单
+    alertRuleForm.value = {
+      name: '',
+      metric_name: '',
+      condition_type: 'gt',
+      threshold: 80,
+      duration: 60,
+      level: 'warning',
+      notify_channels: []
+    }
+    fetchAlertRules()
+  } catch (error) {
+    if (error !== 'cancel' && error !== false) {
+      console.error('创建告警规则失败:', error)
+      ElMessage.error('创建告警规则失败')
+    }
+  } finally {
+    alertRuleSubmitting.value = false
+  }
+}
+
+// 提交事件定义
+const submitEventDef = async () => {
+  if (!eventDefFormRef.value) return
+  try {
+    await eventDefFormRef.value.validate()
+    eventDefSubmitting.value = true
+    await createEventDefinition({
+      app_id: props.appId,
+      ...eventDefForm.value,
+      properties: eventDefForm.value.properties.filter(p => p.trim() !== '')
+    })
+    ElMessage.success('事件定义创建成功')
+    showEventDefDialog.value = false
+    // 重置表单
+    eventDefForm.value = {
+      name: '',
+      code: '',
+      description: '',
+      properties: []
+    }
+    fetchEventDefinitions()
+  } catch (error) {
+    if (error !== 'cancel' && error !== false) {
+      console.error('创建事件定义失败:', error)
+      ElMessage.error('创建事件定义失败')
+    }
+  } finally {
+    eventDefSubmitting.value = false
   }
 }
 

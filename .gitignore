@@ -105,3 +105,21 @@ temp/
 *.db
 *.sqlite
 *.sqlite3
+
+# Go
+vendor/
+*.exe
+*.dll
+*.so
+*.dylib
+go.sum
+
+# 编译后的二进制文件
+backend/server
+backend/app-backend
+backend/app-platform-server
+
+# 数据库备份
+*.sql
+backups/
+database_backup/

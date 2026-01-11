@@ -54,6 +54,7 @@ func main() {
 	// 中间件
 	r.Use(middleware.CORSMiddleware(&cfg.CORS))
 	r.Use(middleware.LoggerMiddleware())
+	r.Use(middleware.SecurityHeadersMiddleware()) // 添加HTTP安全响应头
 
 	// 初始化全局限流器 (100 QPS/IP, 突发200请求)
 	middleware.InitRateLimiter(200, 100)

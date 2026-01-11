@@ -4,6 +4,7 @@ import (
 	"app-platform-backend/internal/model"
 	"app-platform-backend/internal/response"
 	"app-platform-backend/internal/validator"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -132,6 +133,7 @@ func Create(c *gin.Context) {
 // Update 更新版本
 func Update(c *gin.Context) {
 	idStr := c.Param("id")
+	appIDStr := c.Query("app_id")
 
 	// 验证ID
 	id, err := validator.ValidateID(idStr)
@@ -140,11 +142,22 @@ func Update(c *gin.Context) {
 		return
 	}
 
-	// 检查版本是否存在
+	// 验证app_id
+	if appIDStr == "" {
+		response.ParamError(c, "app_id 不能为空")
+		return
+	}
+	appID, err := strconv.ParseUint(appIDStr, 10, 32)
+	if err != nil {
+		response.ParamError(c, "无效的 app_id")
+		return
+	}
+
+	// 检查版本是否存在且属于该APP
 	var existingVersion model.Version
-	if err := db.First(&existingVersion, id).Error; err != nil {
+	if err := db.Where("id = ? AND app_id = ?", id, appID).First(&existingVersion).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			response.NotFound(c, "版本不存在")
+			response.NotFound(c, "版本不存在或无权限操作")
 			return
 		}
 		response.DBError(c, err)
@@ -197,6 +210,7 @@ func Update(c *gin.Context) {
 // Publish 发布版本
 func Publish(c *gin.Context) {
 	idStr := c.Param("id")
+	appIDStr := c.Query("app_id")
 
 	// 验证ID
 	id, err := validator.ValidateID(idStr)
@@ -205,11 +219,22 @@ func Publish(c *gin.Context) {
 		return
 	}
 
-	// 检查版本是否存在
+	// 验证app_id
+	if appIDStr == "" {
+		response.ParamError(c, "app_id 不能为空")
+		return
+	}
+	appID, err := strconv.ParseUint(appIDStr, 10, 32)
+	if err != nil {
+		response.ParamError(c, "无效的 app_id")
+		return
+	}
+
+	// 检查版本是否存在且属于该APP
 	var existingVersion model.Version
-	if err := db.First(&existingVersion, id).Error; err != nil {
+	if err := db.Where("id = ? AND app_id = ?", id, appID).First(&existingVersion).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			response.NotFound(c, "版本不存在")
+			response.NotFound(c, "版本不存在或无权限操作")
 			return
 		}
 		response.DBError(c, err)
@@ -236,6 +261,7 @@ func Publish(c *gin.Context) {
 // Offline 下线版本
 func Offline(c *gin.Context) {
 	idStr := c.Param("id")
+	appIDStr := c.Query("app_id")
 
 	// 验证ID
 	id, err := validator.ValidateID(idStr)
@@ -244,11 +270,22 @@ func Offline(c *gin.Context) {
 		return
 	}
 
-	// 检查版本是否存在
+	// 验证app_id
+	if appIDStr == "" {
+		response.ParamError(c, "app_id 不能为空")
+		return
+	}
+	appID, err := strconv.ParseUint(appIDStr, 10, 32)
+	if err != nil {
+		response.ParamError(c, "无效的 app_id")
+		return
+	}
+
+	// 检查版本是否存在且属于该APP
 	var existingVersion model.Version
-	if err := db.First(&existingVersion, id).Error; err != nil {
+	if err := db.Where("id = ? AND app_id = ?", id, appID).First(&existingVersion).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			response.NotFound(c, "版本不存在")
+			response.NotFound(c, "版本不存在或无权限操作")
 			return
 		}
 		response.DBError(c, err)
@@ -271,6 +308,7 @@ func Offline(c *gin.Context) {
 // Delete 删除版本
 func Delete(c *gin.Context) {
 	idStr := c.Param("id")
+	appIDStr := c.Query("app_id")
 
 	// 验证ID
 	id, err := validator.ValidateID(idStr)
@@ -279,11 +317,22 @@ func Delete(c *gin.Context) {
 		return
 	}
 
-	// 检查版本是否存在
+	// 验证app_id
+	if appIDStr == "" {
+		response.ParamError(c, "app_id 不能为空")
+		return
+	}
+	appID, err := strconv.ParseUint(appIDStr, 10, 32)
+	if err != nil {
+		response.ParamError(c, "无效的 app_id")
+		return
+	}
+
+	// 检查版本是否存在且属于该APP
 	var existingVersion model.Version
-	if err := db.First(&existingVersion, id).Error; err != nil {
+	if err := db.Where("id = ? AND app_id = ?", id, appID).First(&existingVersion).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			response.NotFound(c, "版本不存在")
+			response.NotFound(c, "版本不存在或无权限删除")
 			return
 		}
 		response.DBError(c, err)

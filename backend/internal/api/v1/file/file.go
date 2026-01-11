@@ -10,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -32,6 +33,20 @@ var allowedMimeTypes = map[string]bool{
 	"application/json": true,
 	"application/vnd.ms-excel": true,
 	"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": true,
+	"application/msword": true,
+	"application/vnd.openxmlformats-officedocument.wordprocessingml.document": true,
+	"video/mp4":       true,
+	"audio/mpeg":      true,
+	"audio/mp3":       true,
+}
+
+// 危险的文件扩展名（黑名单）
+var dangerousExtensions = map[string]bool{
+	".exe": true, ".bat": true, ".cmd": true, ".com": true,
+	".msi": true, ".scr": true, ".pif": true, ".vbs": true,
+	".js":  true, ".jse": true, ".ws":  true, ".wsf": true,
+	".sh":  true, ".php": true, ".asp": true, ".aspx": true,
+	".jsp": true, ".py":  true, ".rb":  true, ".pl":  true,
 }
 
 // 最大文件大小 (50MB)
@@ -76,14 +91,21 @@ func Upload(c *gin.Context) {
 		mimeType = "application/octet-stream"
 	}
 
-	// 验证文件类型（可选，根据需求开启）
-	// if !allowedMimeTypes[mimeType] {
-	// 	response.ParamError(c, "不支持的文件类型")
-	// 	return
-	// }
+	// 验证文件类型（白名单）
+	if !allowedMimeTypes[mimeType] {
+		response.ParamError(c, "不支持的文件类型: "+mimeType)
+		return
+	}
+
+	// 验证文件扩展名（黑名单）
+	ext := strings.ToLower(filepath.Ext(header.Filename))
+	if dangerousExtensions[ext] {
+		response.ParamError(c, "不允许上传此类型的文件")
+		return
+	}
 
 	// 生成唯一文件名
-	ext := filepath.Ext(header.Filename)
+	// ext已在上面定义
 	hash := md5.New()
 	io.Copy(hash, file)
 	file.Seek(0, 0)
@@ -194,6 +216,7 @@ func List(c *gin.Context) {
 // Detail 文件详情
 func Detail(c *gin.Context) {
 	id := c.Param("id")
+	appIDStr := c.Query("app_id")
 
 	// 验证ID
 	if _, err := validator.ValidateID(id); err != nil {
@@ -201,10 +224,22 @@ func Detail(c *gin.Context) {
 		return
 	}
 
+	// 验证app_id
+	if appIDStr == "" {
+		response.ParamError(c, "app_id 不能为空")
+		return
+	}
+	appID, err := strconv.ParseUint(appIDStr, 10, 32)
+	if err != nil {
+		response.ParamError(c, "无效的 app_id")
+		return
+	}
+
 	var file model.File
-	if err := db.First(&file, id).Error; err != nil {
+	// 同时验证id和app_id，防止越权访问
+	if err := db.Where("id = ? AND app_id = ?", id, appID).First(&file).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			response.NotFound(c, "文件不存在")
+			response.NotFound(c, "文件不存在或无权限访问")
 			return
 		}
 		response.DBError(c, err)
@@ -224,6 +259,7 @@ func Detail(c *gin.Context) {
 // Download 下载文件
 func Download(c *gin.Context) {
 	id := c.Param("id")
+	appIDStr := c.Query("app_id")
 
 	// 验证ID
 	if _, err := validator.ValidateID(id); err != nil {
@@ -231,10 +267,22 @@ func Download(c *gin.Context) {
 		return
 	}
 
+	// 验证app_id
+	if appIDStr == "" {
+		response.ParamError(c, "app_id 不能为空")
+		return
+	}
+	appID, err := strconv.ParseUint(appIDStr, 10, 32)
+	if err != nil {
+		response.ParamError(c, "无效的 app_id")
+		return
+	}
+
 	var file model.File
-	if err := db.First(&file, id).Error; err != nil {
+	// 同时验证id和app_id，防止越权访问
+	if err := db.Where("id = ? AND app_id = ?", id, appID).First(&file).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			response.NotFound(c, "文件不存在")
+			response.NotFound(c, "文件不存在或无权限访问")
 			return
 		}
 		response.DBError(c, err)
@@ -255,6 +303,7 @@ func Download(c *gin.Context) {
 // Delete 删除文件
 func Delete(c *gin.Context) {
 	id := c.Param("id")
+	appIDStr := c.Query("app_id")
 
 	// 验证ID
 	if _, err := validator.ValidateID(id); err != nil {
@@ -262,10 +311,22 @@ func Delete(c *gin.Context) {
 		return
 	}
 
+	// 验证app_id
+	if appIDStr == "" {
+		response.ParamError(c, "app_id 不能为空")
+		return
+	}
+	appID, err := strconv.ParseUint(appIDStr, 10, 32)
+	if err != nil {
+		response.ParamError(c, "无效的 app_id")
+		return
+	}
+
 	var file model.File
-	if err := db.First(&file, id).Error; err != nil {
+	// 同时验证id和app_id，防止越权删除
+	if err := db.Where("id = ? AND app_id = ?", id, appID).First(&file).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			response.NotFound(c, "文件不存在")
+			response.NotFound(c, "文件不存在或无权限删除")
 			return
 		}
 		response.DBError(c, err)
@@ -287,7 +348,8 @@ func Delete(c *gin.Context) {
 // BatchDelete 批量删除文件
 func BatchDelete(c *gin.Context) {
 	var req struct {
-		IDs []uint `json:"ids" binding:"required"`
+		AppID uint   `json:"app_id" binding:"required"`
+		IDs   []uint `json:"ids" binding:"required"`
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -305,9 +367,15 @@ func BatchDelete(c *gin.Context) {
 		return
 	}
 
+	// 只查询属于该APP的文件，防止越权删除
 	var files []model.File
-	if err := db.Find(&files, req.IDs).Error; err != nil {
+	if err := db.Where("id IN ? AND app_id = ?", req.IDs, req.AppID).Find(&files).Error; err != nil {
 		response.DBError(c, err)
+		return
+	}
+
+	if len(files) == 0 {
+		response.ParamError(c, "未找到可删除的文件")
 		return
 	}
 
@@ -316,8 +384,12 @@ func BatchDelete(c *gin.Context) {
 		os.Remove(file.FilePath)
 	}
 
-	// 删除数据库记录
-	result := db.Delete(&model.File{}, req.IDs)
+	// 只删除属于该APP的文件记录
+	var fileIDs []uint
+	for _, f := range files {
+		fileIDs = append(fileIDs, f.ID)
+	}
+	result := db.Delete(&model.File{}, fileIDs)
 	if result.Error != nil {
 		response.DBError(c, result.Error)
 		return

@@ -261,6 +261,7 @@ func CreateAlert(c *gin.Context) {
 // UpdateAlert 更新告警规则
 func UpdateAlert(c *gin.Context) {
 	id := c.Param("id")
+	appIDStr := c.Query("app_id")
 
 	// 验证ID
 	if _, err := validator.ValidateID(id); err != nil {
@@ -268,10 +269,22 @@ func UpdateAlert(c *gin.Context) {
 		return
 	}
 
+	// 验证app_id
+	if appIDStr == "" {
+		response.ParamError(c, "app_id 不能为空")
+		return
+	}
+	appID, err := strconv.ParseUint(appIDStr, 10, 32)
+	if err != nil {
+		response.ParamError(c, "无效的 app_id")
+		return
+	}
+
 	var alert model.MonitorAlert
-	if err := db.First(&alert, id).Error; err != nil {
+	// 同时验证id和app_id，防止越权操作
+	if err := db.Where("id = ? AND app_id = ?", id, appID).First(&alert).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			response.NotFound(c, "告警规则不存在")
+			response.NotFound(c, "告警规则不存在或无权限操作")
 			return
 		}
 		response.DBError(c, err)
@@ -328,6 +341,7 @@ func UpdateAlert(c *gin.Context) {
 // DeleteAlert 删除告警规则
 func DeleteAlert(c *gin.Context) {
 	id := c.Param("id")
+	appIDStr := c.Query("app_id")
 
 	// 验证ID
 	if _, err := validator.ValidateID(id); err != nil {
@@ -335,10 +349,22 @@ func DeleteAlert(c *gin.Context) {
 		return
 	}
 
+	// 验证app_id
+	if appIDStr == "" {
+		response.ParamError(c, "app_id 不能为空")
+		return
+	}
+	appID, err := strconv.ParseUint(appIDStr, 10, 32)
+	if err != nil {
+		response.ParamError(c, "无效的 app_id")
+		return
+	}
+
 	var alert model.MonitorAlert
-	if err := db.First(&alert, id).Error; err != nil {
+	// 同时验证id和app_id，防止越权删除
+	if err := db.Where("id = ? AND app_id = ?", id, appID).First(&alert).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			response.NotFound(c, "告警规则不存在")
+			response.NotFound(c, "告警规则不存在或无权限删除")
 			return
 		}
 		response.DBError(c, err)
@@ -356,6 +382,7 @@ func DeleteAlert(c *gin.Context) {
 // ResolveAlert 解决告警
 func ResolveAlert(c *gin.Context) {
 	id := c.Param("id")
+	appIDStr := c.Query("app_id")
 
 	// 验证ID
 	if _, err := validator.ValidateID(id); err != nil {
@@ -363,10 +390,22 @@ func ResolveAlert(c *gin.Context) {
 		return
 	}
 
+	// 验证app_id
+	if appIDStr == "" {
+		response.ParamError(c, "app_id 不能为空")
+		return
+	}
+	appID, err := strconv.ParseUint(appIDStr, 10, 32)
+	if err != nil {
+		response.ParamError(c, "无效的 app_id")
+		return
+	}
+
 	var alert model.MonitorAlert
-	if err := db.First(&alert, id).Error; err != nil {
+	// 同时验证id和app_id，防止越权操作
+	if err := db.Where("id = ? AND app_id = ?", id, appID).First(&alert).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			response.NotFound(c, "告警规则不存在")
+			response.NotFound(c, "告警规则不存在或无权限操作")
 			return
 		}
 		response.DBError(c, err)

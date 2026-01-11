@@ -725,3 +725,41 @@
   - 优先使用DATABASE_URL环境变量（Manus平台TiDB）
   - 如果没有环境变量，回退到config.yaml配置（阿里云MySQL）
   - 部署时无需修改代码，只需配置相应的数据库连接信息
+
+
+## 2026-01-11 系统安全审计
+
+### 审计范围
+- [x] SQL注入漏洞检查 - 未发现漏洞
+- [x] XSS漏洞检查 - 未发现漏洞
+- [x] 越权漏洞检查 - 发现4处水平越权漏洞
+- [x] 其他安全问题检查 - 发现2处中等风险问题
+
+### 发现的问题
+
+#### 高风险 - 越权漏洞
+- [x] 文件删除越权 (file/file.go)
+- [x] 版本删除越权 (version/version.go)
+- [x] 消息删除越权 (message/message.go)
+- [x] 告警规则删除越权 (monitor/monitor.go)
+
+#### 中风险
+- [x] 缺少HTTP安全响应头
+- [x] 文件上传类型验证被注释
+
+### 修复记录
+
+#### 越权漏洞修复
+- 文件模块: Detail/Download/Delete/BatchDelete添加app_id验证
+- 版本模块: Update/Publish/Offline/Delete添加app_id验证
+- 消息模块: Detail/MarkRead/Delete/BatchDelete添加app_id验证
+- 监控模块: UpdateAlert/DeleteAlert/ResolveAlert添加app_id验证
+
+#### HTTP安全响应头
+- 添加SecurityHeadersMiddleware中间件
+- 包含: X-Content-Type-Options, X-Frame-Options, X-XSS-Protection, Referrer-Policy, CSP
+
+#### 文件上传安全
+- 启用MIME类型白名单验证
+- 添加危险文件扩展名黑名单
+- 阻止上传可执行文件和脚本文件

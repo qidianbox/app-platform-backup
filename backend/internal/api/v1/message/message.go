@@ -107,11 +107,18 @@ func UnreadCount(c *gin.Context) {
 // Detail 消息详情
 func Detail(c *gin.Context) {
 	id := c.Param("id")
+	appID := c.Query("app_id")
+
+	if appID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"code": 400, "message": "app_id is required"})
+		return
+	}
 
 	var message model.Message
-	if err := db.First(&message, id).Error; err != nil {
+	// 同时验证id和app_id，防止越权访问
+	if err := db.Where("id = ? AND app_id = ?", id, appID).First(&message).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			c.JSON(http.StatusNotFound, gin.H{"code": 404, "message": "Message not found"})
+			c.JSON(http.StatusNotFound, gin.H{"code": 404, "message": "Message not found or no permission"})
 			return
 		}
 		c.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "Failed to query message"})
@@ -153,11 +160,18 @@ func Stats(c *gin.Context) {
 // MarkRead 标记消息已读
 func MarkRead(c *gin.Context) {
 	id := c.Param("id")
+	appID := c.Query("app_id")
+
+	if appID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"code": 400, "message": "app_id is required"})
+		return
+	}
 
 	var message model.Message
-	if err := db.First(&message, id).Error; err != nil {
+	// 同时验证id和app_id，防止越权操作
+	if err := db.Where("id = ? AND app_id = ?", id, appID).First(&message).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			c.JSON(http.StatusNotFound, gin.H{"code": 404, "message": "Message not found"})
+			c.JSON(http.StatusNotFound, gin.H{"code": 404, "message": "Message not found or no permission"})
 			return
 		}
 		c.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "Failed to query message"})
@@ -203,11 +217,18 @@ func MarkAllRead(c *gin.Context) {
 // Delete 删除消息
 func Delete(c *gin.Context) {
 	id := c.Param("id")
+	appID := c.Query("app_id")
+
+	if appID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"code": 400, "message": "app_id is required"})
+		return
+	}
 
 	var message model.Message
-	if err := db.First(&message, id).Error; err != nil {
+	// 同时验证id和app_id，防止越权删除
+	if err := db.Where("id = ? AND app_id = ?", id, appID).First(&message).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			c.JSON(http.StatusNotFound, gin.H{"code": 404, "message": "Message not found"})
+			c.JSON(http.StatusNotFound, gin.H{"code": 404, "message": "Message not found or no permission"})
 			return
 		}
 		c.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "Failed to query message"})
@@ -225,7 +246,8 @@ func Delete(c *gin.Context) {
 // BatchDelete 批量删除消息
 func BatchDelete(c *gin.Context) {
 	var req struct {
-		IDs []uint `json:"ids" binding:"required"`
+		AppID uint   `json:"app_id" binding:"required"`
+		IDs   []uint `json:"ids" binding:"required"`
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -233,7 +255,8 @@ func BatchDelete(c *gin.Context) {
 		return
 	}
 
-	result := db.Delete(&model.Message{}, req.IDs)
+	// 只删除属于该APP的消息，防止越权删除
+	result := db.Where("id IN ? AND app_id = ?", req.IDs, req.AppID).Delete(&model.Message{})
 
 	c.JSON(http.StatusOK, gin.H{
 		"code":    0,

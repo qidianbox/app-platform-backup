@@ -120,3 +120,24 @@ func CORSMiddleware(cfg *config.CORSConfig) gin.HandlerFunc {
 func LoggerMiddleware() gin.HandlerFunc {
 	return gin.Logger()
 }
+
+// SecurityHeadersMiddleware 添加HTTP安全响应头
+func SecurityHeadersMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		// 防止MIME类型混淆攻击
+		c.Header("X-Content-Type-Options", "nosniff")
+		// 防止点击劫持
+		c.Header("X-Frame-Options", "DENY")
+		// 启用XSS过滤器
+		c.Header("X-XSS-Protection", "1; mode=block")
+		// 控制Referer信息泄露
+		c.Header("Referrer-Policy", "strict-origin-when-cross-origin")
+		// 防止缓存敏感信息
+		c.Header("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate")
+		c.Header("Pragma", "no-cache")
+		c.Header("Expires", "0")
+		// 内容安全策略（基本版）
+		c.Header("Content-Security-Policy", "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' ws: wss:")
+		c.Next()
+	}
+}

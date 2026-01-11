@@ -25,6 +25,12 @@ const routes = [
         path: 'modules',
         name: 'Modules',
         component: () => import('@/views/module/index.vue')
+      },
+      {
+        path: 'system/audit',
+        name: 'AuditLog',
+        component: () => import('@/views/system/AuditLog.vue'),
+        meta: { title: '操作审计日志' }
       }
     ]
   },

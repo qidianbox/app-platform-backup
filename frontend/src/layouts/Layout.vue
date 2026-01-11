@@ -33,6 +33,10 @@
         <el-icon><Menu /></el-icon>
         <span>模块管理</span>
       </router-link>
+      <router-link to="/system/audit" class="nav-item" :class="{ active: $route.path === '/system/audit' }">
+        <el-icon><Document /></el-icon>
+        <span>审计日志</span>
+      </router-link>
     </nav>
     
     <main class="main">
@@ -44,7 +48,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { Grid, ArrowDown, DataAnalysis, Menu } from '@element-plus/icons-vue'
+import { Grid, ArrowDown, DataAnalysis, Menu, Document } from '@element-plus/icons-vue'
 
 const router = useRouter()
 const user = ref(null)

@@ -3,7 +3,9 @@ package file
 import (
 	"app-platform-backend/core/module"
 	fileapi "app-platform-backend/internal/api/v1/file"
+	"app-platform-backend/internal/middleware"
 	"app-platform-backend/internal/pkg/database"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -32,7 +34,8 @@ func (m *FileModule) RegisterRoutes(group *gin.RouterGroup) {
 	g := group.Group("/files")
 	{
 		g.GET("", fileapi.List)
-		g.POST("", fileapi.Upload)
+		// 文件上传限流: 20次/分钟/IP，防止恶意上传
+		g.POST("", middleware.APIRateLimitMiddleware(20, time.Minute), fileapi.Upload)
 		g.GET("/stats", fileapi.Stats)
 		g.GET("/:id", fileapi.Detail)
 		g.GET("/download/:id", fileapi.Download)

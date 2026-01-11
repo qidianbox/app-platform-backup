@@ -176,17 +176,33 @@ func APIRateLimitMiddleware(maxRequests int, window time.Duration) gin.HandlerFu
 				count:     1,
 				resetTime: now.Add(window),
 			}
+			info = requests[key]
 			mu.Unlock()
+			// 添加限流响应头
+			c.Header("X-RateLimit-Limit", intToStr(maxRequests))
+			c.Header("X-RateLimit-Remaining", intToStr(maxRequests-1))
+			c.Header("X-RateLimit-Reset", intToStr(int(info.resetTime.Unix())))
 			c.Next()
 			return
 		}
 
+		remaining := maxRequests - info.count - 1
+		if remaining < 0 {
+			remaining = 0
+		}
+
 		if info.count >= maxRequests {
+			retryAfter := int(info.resetTime.Sub(now).Seconds())
 			mu.Unlock()
+			// 添加限流响应头
+			c.Header("X-RateLimit-Limit", intToStr(maxRequests))
+			c.Header("X-RateLimit-Remaining", "0")
+			c.Header("X-RateLimit-Reset", intToStr(int(info.resetTime.Unix())))
+			c.Header("Retry-After", intToStr(retryAfter))
 			c.JSON(http.StatusTooManyRequests, gin.H{
-				"code":    429,
-				"message": "该接口请求过于频繁，请稍后再试",
-				"retry_after": int(info.resetTime.Sub(now).Seconds()),
+				"code":        429,
+				"message":     "该接口请求过于频繁，请稍后再试",
+				"retry_after": retryAfter,
 			})
 			c.Abort()
 			return
@@ -194,6 +210,30 @@ func APIRateLimitMiddleware(maxRequests int, window time.Duration) gin.HandlerFu
 
 		info.count++
 		mu.Unlock()
+		// 添加限流响应头
+		c.Header("X-RateLimit-Limit", intToStr(maxRequests))
+		c.Header("X-RateLimit-Remaining", intToStr(remaining))
+		c.Header("X-RateLimit-Reset", intToStr(int(info.resetTime.Unix())))
 		c.Next()
 	}
+}
+
+// intToStr 将int转换为字符串
+func intToStr(n int) string {
+	if n == 0 {
+		return "0"
+	}
+	var result []byte
+	negative := n < 0
+	if negative {
+		n = -n
+	}
+	for n > 0 {
+		result = append([]byte{byte('0' + n%10)}, result...)
+		n /= 10
+	}
+	if negative {
+		result = append([]byte{'-'}, result...)
+	}
+	return string(result)
 }

@@ -763,3 +763,22 @@
 - 启用MIME类型白名单验证
 - 添加危险文件扩展名黑名单
 - 阻止上传可执行文件和脚本文件
+
+
+## 2026-01-11 操作日志审计和API频率限制
+
+### 操作日志审计
+- [x] 创建操作日志数据库表 - 已存在audit_logs表
+- [x] 实现审计日志中间件 - 已有完整实现（middleware/audit.go）
+- [x] 记录敏感操作（删除、修改、权限变更） - 记录所有认证后的API请求
+- [x] 添加日志查询API - /api/v1/audit/logs, /api/v1/audit/stats, /api/v1/audit/export
+- [x] 添加前端日志查看界面 - /system/audit 页面，支持筛选、分页、导出
+
+### API访问频率限制
+- [x] 实现基于IP的全局限流 - 200 QPS/IP，令牌桶算法
+- [x] 实现基于用户的接口限流 - APIRateLimitMiddleware
+- [x] 针对敏感接口添加更严格限制
+  - 登录接口: 5次/分钟/IP
+  - 文件上传: 20次/分钟/IP
+  - 错误报告: 30次/分钟/IP
+- [x] 添加限流响应头 - X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset, Retry-After

@@ -84,11 +84,11 @@ func main() {
 	v1 := r.Group("/api/v1")
 	{
 // 公开接口（无需认证）
-			// 登录接口使用更严格的限流 (10 QPS/IP, 1分钟窗口)
-			v1.POST("/admin/login", middleware.APIRateLimitMiddleware(10, time.Minute), admin.Login)
-			
-			// 错误报告接口（允许未认证请求，用于收集前端错误）
-			v1.POST("/system/error-report", system.ErrorReportHandler)
+				// 登录接口使用更严格的限流 (5次/分钟/IP，防止暴力破解)
+				v1.POST("/admin/login", middleware.APIRateLimitMiddleware(5, time.Minute), admin.Login)
+				
+				// 错误报告接口（限流30次/分钟/IP）
+				v1.POST("/system/error-report", middleware.APIRateLimitMiddleware(30, time.Minute), system.ErrorReportHandler)
 			
 			// WebSocket连接端点（无需JWT认证，通过URL参数传递token）
 			v1.GET("/ws", wsapi.HandleWebSocket)

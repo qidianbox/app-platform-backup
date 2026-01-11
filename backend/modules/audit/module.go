@@ -30,6 +30,7 @@ func (m *AuditModule) RegisterRoutes(group *gin.RouterGroup) {
 	g := group.Group("/audit")
 	{
 		g.GET("", auditapi.List)
+		g.GET("/logs", auditapi.List)  // 别名路由，兼容前端请求
 		g.GET("/stats", auditapi.Stats)
 		g.GET("/export", auditapi.Export)
 	}

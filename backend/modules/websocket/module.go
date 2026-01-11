@@ -2,7 +2,6 @@ package websocket
 
 import (
 	"app-platform-backend/core/module"
-	wsapi "app-platform-backend/internal/api/v1/websocket"
 
 	"github.com/gin-gonic/gin"
 )
@@ -24,8 +23,8 @@ func (m *WebSocketModule) GetFunctions() []module.Function {
 }
 
 func (m *WebSocketModule) RegisterRoutes(group *gin.RouterGroup) {
-	// WebSocket连接端点
-	group.GET("/ws", wsapi.HandleWebSocket)
+	// WebSocket连接端点已在main.go中注册为公开路由，此处不再重复注册
+	// 原因：WebSocket不支持在连接时发送Authorization头，需要通过URL参数传递token
 }
 
 func (m *WebSocketModule) Init() error { return nil }

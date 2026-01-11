@@ -14,6 +14,7 @@ import (
 	moduleapi "app-platform-backend/internal/api/v1/module"
 	statsapi "app-platform-backend/internal/api/v1/stats"
 	"app-platform-backend/internal/api/v1/system"
+	wsapi "app-platform-backend/internal/api/v1/websocket"
 	"app-platform-backend/internal/config"
 	"app-platform-backend/internal/middleware"
 	"app-platform-backend/internal/pkg/database"
@@ -87,6 +88,9 @@ func main() {
 			
 			// 错误报告接口（允许未认证请求，用于收集前端错误）
 			v1.POST("/system/error-report", system.ErrorReportHandler)
+			
+			// WebSocket连接端点（无需JWT认证，通过URL参数传递token）
+			v1.GET("/ws", wsapi.HandleWebSocket)
 
 		// 需要认证的接口
 		auth := v1.Group("")

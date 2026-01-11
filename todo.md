@@ -642,3 +642,21 @@
   - 修复WebSocket URL生成逻辑，正确使用后端端口
   - 添加appId空值检查，避免无效连接
   - 支持Manus平台公网地址格式
+
+
+## 2026-01-11 WebSocket连接问题修复（第三轮）
+
+### 问题现象
+- [x] 监控告警页面WebSocket显示"未连接"状态
+- [x] app_id错误已修复，但WebSocket仍无法连接
+
+### 诊断结果
+- [x] 检查后端WebSocket服务是否正常运行 - 服务正常，但路由注册在认证组下
+- [x] 检查WebSocket URL生成是否正确 - URL正确，但需要通过Vite代理
+- [x] 检查网络请求是否到达后端 - 请求到达但被认证中间件拦截
+
+### 已完成修复
+- [x] 将WebSocket路由从main.go中的认证组移动到公开路由组
+- [x] 修改websocket模块的RegisterRoutes方法，避免重复注册路由
+- [x] 在Vite配置中启用WebSocket代理（ws: true）
+- [x] 简化前端WebSocket客户端的URL生成逻辑，使用当前主机通过Vite代理
